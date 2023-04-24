@@ -8,9 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.aplayer.R
 import com.example.aplayer.databinding.FragmentSplashBinding
-import com.example.aplayer.presenter.auth.signIn.SignInFragment
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -48,11 +48,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
             .delay(1500, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                with(requireActivity()) {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.main_container, SignInFragment())
-                        .commit()
-                }
+                findNavController().navigate(R.id.action_splashFragment_to_mainFragment)
             }, { throwable ->
                 Log.e("!@#", throwable.message.toString())
             }

@@ -8,14 +8,16 @@
     tools:context=".presenter.main.MainActivity">
 
     <include layout="@layout/main_toolbar"
-        android:id="@+id/main_toolbar"/>
+        android:id="@+id/toolbar"/>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/main_container"
-        android:name="com.example.aplayer.presenter.splash.SplashFragment"
+    <fragment
+        android:id="@+id/nav_host"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/main_graph"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
