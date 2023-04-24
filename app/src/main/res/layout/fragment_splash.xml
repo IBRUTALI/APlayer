@@ -39,7 +39,7 @@
         android:layout_height="8dp"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:scaleY="2"
-        android:indeterminateTint="?attr/colorPrimary"
+        android:theme="@style/ProgressBarStyle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -51,7 +51,7 @@
         android:layout_marginBottom="5dp"
         android:text="100%"
         android:textColor="?attr/colorPrimary"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/splash_progress_bar"
         app:layout_constraintEnd_toEndOf="@+id/splash_progress_bar"

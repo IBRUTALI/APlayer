@@ -17,4 +17,8 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:navigationBarColor">@color/black</item>
     </style>
+
+    <style name="ProgressBarStyle">
+        <item name="colorAccent">@color/purple_200</item>
+    </style>
 </resources>

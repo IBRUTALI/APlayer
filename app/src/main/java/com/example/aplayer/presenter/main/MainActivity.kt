@@ -16,9 +16,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initToolbar()
+        initSplashScreen()
+    }
+
+    private fun initToolbar() {
         binding.mainToolbar.mainToolbar.visibility = GONE
         binding.mainToolbar.mainToolbar.inflateMenu(R.menu.main_menu)
+    }
 
+    private fun initSplashScreen() {
         supportFragmentManager.beginTransaction()
             .add(SplashFragment(), "Splash")
             .commit()
