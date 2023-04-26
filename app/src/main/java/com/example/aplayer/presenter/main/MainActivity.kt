@@ -48,6 +48,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun setupTab() {
+        binding.mainTab.setOnItemSelectedListener {  }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (navController.currentDestination?.id == R.id.mainFragment) {
