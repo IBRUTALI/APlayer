@@ -14,8 +14,9 @@
             android:id="@+id/action_splashFragment_to_signInFragment"
             app:destination="@id/signInFragment" />
         <action
-            android:id="@+id/action_splashFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            android:id="@+id/action_splashFragment_to_tabsFragment"
+            app:destination="@id/tabsFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/signInFragment"
@@ -32,17 +33,8 @@
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up" />
     <fragment
-        android:id="@+id/mainFragment"
-        android:name="com.example.aplayer.presenter.main.MainFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
-        <action
-            android:id="@+id/action_mainFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/playerFragment"
-        android:name="com.example.aplayer.presenter.player.PlayerFragment"
-        android:label="fragment_player"
-        tools:layout="@layout/fragment_player" />
+        android:id="@+id/tabsFragment"
+        android:name="com.example.aplayer.presenter.tabs.TabsFragment"
+        android:label="fragment_tabs"
+        tools:layout="@layout/fragment_tabs" />
 </navigation>
