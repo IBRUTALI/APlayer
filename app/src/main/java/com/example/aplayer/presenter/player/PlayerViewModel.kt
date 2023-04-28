@@ -8,15 +8,6 @@ import com.example.aplayer.data.music.ProviderRepositoryImpl
 import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Single
 
-class PlayerViewModel(
-    applicationContext: Application
-) : AndroidViewModel(applicationContext) {
-
-    private val providerRepositoryImpl = ProviderRepositoryImpl(applicationContext.applicationContext)
-
-    fun getMusic(): Single<List<Music>> {
-        return providerRepositoryImpl.getMusic()
-    }
-
+class PlayerViewModel() : ViewModel() {
 
 }

@@ -4,7 +4,7 @@
     android:id="@+id/tabs_graph"
     app:startDestination="@id/main">
 
-    <include app:graph="@navigation/profile" />
     <include app:graph="@navigation/main" />
+    <include app:graph="@navigation/profile" />
     <include app:graph="@navigation/library" />
 </navigation>

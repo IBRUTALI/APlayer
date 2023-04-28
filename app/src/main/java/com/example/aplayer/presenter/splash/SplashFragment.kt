@@ -48,7 +48,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
             .delay(1500, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                findNavController().navigate(R.id.action_splashFragment_to_tabsFragment)
+                findNavController().navigate(R.id.tabsFragment)
             }, { throwable ->
                 Log.e("!@#", throwable.message.toString())
             }
