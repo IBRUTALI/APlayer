@@ -3,58 +3,69 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center">
 
-    <TextView
-        android:id="@+id/music_item_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:text="ID"
-        android:textColor="?attr/colorPrimary"
-        android:textSize="18dp"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/music_item_cardView"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:cardCornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <ImageView
+            android:id="@+id/music_item_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_launcher_background"
+            android:contentDescription="@string/album_image"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/play"
+            android:src="@drawable/baseline_play_arrow_24" />
+
+        <TextView
+            android:id="@+id/music_item_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:text="@string/duration"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp"/>
+
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/music_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
+        android:maxLength="10"
+        android:maxLines="2"
         android:text="Title"
-        android:textColor="?attr/colorPrimaryVariant"
-        android:textStyle="bold"
+        android:textColor="?attr/colorPrimary"
         android:textSize="14dp"
-        app:layout_constraintStart_toEndOf="@+id/music_item_id"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/music_item_cardView"
+        app:layout_constraintStart_toStartOf="@+id/music_item_cardView"
+        app:layout_constraintTop_toBottomOf="@+id/music_item_cardView" />
 
     <TextView
         android:id="@+id/music_item_artist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginVertical="2dp"
         android:text="Artist"
         android:textColor="?attr/colorPrimary"
         android:textSize="14dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/music_item_id"
+        app:layout_constraintEnd_toEndOf="@+id/music_item_cardView"
+        app:layout_constraintStart_toStartOf="@+id/music_item_cardView"
         app:layout_constraintTop_toBottomOf="@+id/music_item_title" />
-
-    <TextView
-        android:id="@+id/music_item_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:text="Duration"
-        android:textColor="?attr/colorPrimary"
-        android:textSize="14dp"
-        app:layout_constraintBottom_toBottomOf="@+id/music_item_artist"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/music_item_artist"
-        app:layout_constraintTop_toTopOf="@+id/music_item_artist" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

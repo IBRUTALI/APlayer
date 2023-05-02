@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.presenter.main.adapter.MainAdapter
@@ -25,7 +26,7 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.mainRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.mainRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.mainRecyclerView.adapter = adapter
         getMusic()
     }

@@ -3,4 +3,7 @@
     <string name="home">Главная</string>
     <string name="library">Библиотека</string>
     <string name="profile">Профиль</string>
+    <string name="play">play</string>
+    <string name="album_image">album image</string>
+    <string name="duration">Duration</string>
 </resources>

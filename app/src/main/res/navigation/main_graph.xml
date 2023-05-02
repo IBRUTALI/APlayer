@@ -35,6 +35,6 @@
     <fragment
         android:id="@+id/tabsFragment"
         android:name="com.example.aplayer.presenter.tabs.TabsFragment"
-        android:label="fragment_tabs"
+        android:label="APlayer"
         tools:layout="@layout/fragment_tabs" />
 </navigation>
