@@ -12,6 +12,7 @@
         android:layout_height="80dp"
         android:layout_marginTop="2dp"
         app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
         android:backgroundTint="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:text="@string/duration"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="?attr/colorPrimaryVariant"
             android:textSize="14sp"/>
 
     </androidx.cardview.widget.CardView>
@@ -51,7 +52,7 @@
         android:layout_marginTop="2dp"
         android:maxLines="2"
         android:text="Title"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="?attr/colorPrimaryVariant"
         android:textSize="14dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/music_item_cardView"
@@ -64,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="2dp"
         android:text="Artist"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="?attr/colorPrimaryVariant"
         android:textSize="14dp"
         app:layout_constraintEnd_toEndOf="@+id/music_item_cardView"
         app:layout_constraintStart_toStartOf="@+id/music_item_cardView"
