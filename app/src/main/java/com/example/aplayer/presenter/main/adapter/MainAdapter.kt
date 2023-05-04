@@ -31,11 +31,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         with(holder.binding) {
             musicItemTitle.text = musicList[position].name
             musicItemArtist.text = musicList[position].artist
-            musicItemDuration.text = String.format("%d:%d",
-                TimeUnit.MILLISECONDS.toMinutes(musicList[position].duration!!),
-                TimeUnit.MILLISECONDS.toSeconds(musicList[position].duration!!) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(musicList[position].duration!!))
-            )
+            musicItemDuration.text = musicList[position].duration
             Glide.with(holder.itemView.context)
                 .load(musicList[position].artUri)
                 .placeholder(R.drawable.baseline_undefined)

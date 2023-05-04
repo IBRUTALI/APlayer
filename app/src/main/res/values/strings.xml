@@ -6,4 +6,7 @@
     <string name="play">play</string>
     <string name="album_image">album image</string>
     <string name="duration">Duration</string>
+    <string name="settings">Настройки</string>
+    <string name="logout">Выйти</string>
+    <string name="layout_style">Стиль списка</string>
 </resources>
