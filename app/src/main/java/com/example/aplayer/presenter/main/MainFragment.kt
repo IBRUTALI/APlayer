@@ -1,19 +1,20 @@
 package com.example.aplayer.presenter.main
 
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.MenuHost
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.aplayer.R
 import com.example.aplayer.databinding.FragmentMainBinding
+import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.adapter.MainAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -23,12 +24,14 @@ class MainFragment : Fragment() {
     private val binding get() = mBinding!!
     private val adapter by lazy { MainAdapter() }
     private val viewModel by lazy { MainViewModel(activity?.application!!) }
+    private var indexState: Int = -1
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.mainRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.mainRecyclerView.adapter = adapter
         getMusic()
+        itemClickListener()
     }
 
     override fun onCreateView(
@@ -37,6 +40,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentMainBinding.inflate(layoutInflater, container, false)
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -50,6 +54,64 @@ class MainFragment : Fragment() {
                 Log.e("!@#", th.message.toString())
             }
             )
+    }
+
+    private fun itemClickListener() {
+        adapter.setOnClickListener(object : MainAdapter.OnClickListener {
+            override fun onClick(position: Int, model: Music) {
+                val bundle = Bundle()
+                bundle.putSerializable("main_item", model)
+                findNavController().navigate(R.id.action_mainFragment_to_playerFragment)
+            }
+        })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.layout_style -> {
+                layoutStyleDialog()
+                true
+            }
+            else -> false
+        }
+
+    }
+
+    private fun layoutStyleDialog() {
+        val choiceList = arrayOf(
+            "Список",
+            "Плитка"
+        )
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Выберете стиль")
+            .setPositiveButton("Ок") { _, _ ->
+                when (indexState) {
+                    0 -> {
+                        binding.mainRecyclerView.layoutManager =
+                            LinearLayoutManager(requireContext())
+                        binding.mainRecyclerView.adapter = adapter
+                    }
+                    1 -> {
+                        binding.mainRecyclerView.layoutManager =
+                            GridLayoutManager(requireContext(), 3)
+                        binding.mainRecyclerView.adapter = adapter
+                    }
+                }
+            }
+            .setNegativeButton("Отмена") { _, _ -> }
+            .setSingleChoiceItems(choiceList, indexState) { _, index ->
+                when (index) {
+                    0 -> {
+                        indexState = 0
+                    }
+                    1 -> {
+                        indexState = 1
+                    }
+                }
+
+            }
+        dialog.create()
+        dialog.show()
     }
 
     override fun onDestroy() {

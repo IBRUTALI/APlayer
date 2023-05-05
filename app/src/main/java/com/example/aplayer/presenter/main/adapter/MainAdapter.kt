@@ -1,6 +1,5 @@
 package com.example.aplayer.presenter.main.adapter
 
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -9,10 +8,9 @@ import com.bumptech.glide.Glide
 import com.example.aplayer.R
 import com.example.aplayer.databinding.MusicItemBinding
 import com.example.aplayer.domain.music.model.Music
-import java.sql.Time
-import java.util.concurrent.TimeUnit
 
 class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
+    private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
 
     class MainViewHolder(val binding: MusicItemBinding): ViewHolder(binding.root)
@@ -40,6 +38,20 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
                 .into(musicItemImage)
         }
 
+        holder.itemView.setOnClickListener {
+            if (onClickListener != null) {
+                onClickListener!!.onClick(position, musicList[position] )
+            }
+        }
+
+    }
+
+    fun setOnClickListener(onClickListener: OnClickListener) {
+        this.onClickListener = onClickListener
+    }
+
+    interface OnClickListener {
+        fun onClick(position: Int, model: Music)
     }
 
     fun setList(list: List<Music>) {

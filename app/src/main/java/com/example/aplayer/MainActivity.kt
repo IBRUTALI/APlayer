@@ -31,8 +31,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar.mainToolbar)
         setupNavigation()
-
-
     }
 
     private fun setupNavigation() {
@@ -73,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
-        return true
+        return false
     }
 
     override fun onDestroy() {
