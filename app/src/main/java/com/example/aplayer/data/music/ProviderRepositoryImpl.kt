@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
@@ -34,9 +35,12 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
                                 val size =
                                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
+                                val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
                                 val artUri = getAlbumArt(data, albumId)
+                                val musicUri = getMusicUriById(musicId)
                                 val music = Music(
                                     artUri = artUri,
+                                    uri = musicUri,
                                     data = data,
                                     artist = artist,
                                     size = size,
@@ -59,6 +63,10 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
         val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
         Log.d("!@#", filePath)
         return ContentUris.withAppendedId(sArtworkUri, albumId)
+    }
+
+    private fun getMusicUriById(musicId: Long): Uri{
+        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, musicId)
     }
 
     private fun parseMusic(music: Music): Music {

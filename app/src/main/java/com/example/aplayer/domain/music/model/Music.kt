@@ -6,6 +6,7 @@ import java.io.Serializable
 data class Music(
     val id: Int ?= null,
     val artUri: Uri ?= null,
+    val uri: Uri ?= null,
     val data: String ?= null,
     val artist: String?= "Неизвестно",
     val size: String?= null,

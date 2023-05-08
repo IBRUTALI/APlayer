@@ -60,8 +60,8 @@ class MainFragment : Fragment() {
         adapter.setOnClickListener(object : MainAdapter.OnClickListener {
             override fun onClick(position: Int, model: Music) {
                 val bundle = Bundle()
-                bundle.putSerializable("main_item", model)
-                findNavController().navigate(R.id.action_mainFragment_to_playerFragment)
+                bundle.putSerializable("music", model)
+                findNavController().navigate(R.id.action_mainFragment_to_playerFragment, bundle)
             }
         })
     }
