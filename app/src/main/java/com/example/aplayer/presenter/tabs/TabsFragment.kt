@@ -34,6 +34,7 @@ class TabsFragment : Fragment() {
         NavigationUI.setupWithNavController(binding.bottomNavigationView, navController)
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
         mBinding = null

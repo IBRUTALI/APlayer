@@ -9,4 +9,6 @@
     <string name="settings">Настройки</string>
     <string name="logout">Выйти</string>
     <string name="layout_style">Стиль списка</string>
+    <string name="name">Name</string>
+    <string name="artist">Artist</string>
 </resources>

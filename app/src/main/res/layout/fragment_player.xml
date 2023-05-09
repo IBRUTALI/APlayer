@@ -7,4 +7,125 @@
     android:layout_height="match_parent"
     tools:context=".presenter.player.PlayerFragment">
 
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/player_card_view"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="100dp"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/player_album_art"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:src="@tools:sample/avatars" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/player_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:textAlignment="center"
+        android:maxLines="1"
+        android:textStyle="bold"
+        android:textColor="?attr/colorPrimaryVariant"
+        android:textSize="20sp"
+        android:text="@string/name"
+        app:layout_constraintEnd_toStartOf="@+id/player_like"
+        app:layout_constraintStart_toEndOf="@+id/player_dislike"
+        app:layout_constraintTop_toBottomOf="@+id/player_card_view" />
+
+    <TextView
+        android:id="@+id/player_artist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/artist"
+        android:textAlignment="center"
+        android:textColor="?attr/colorPrimaryVariant"
+        app:layout_constraintEnd_toEndOf="@+id/player_name"
+        app:layout_constraintStart_toStartOf="@+id/player_name"
+        app:layout_constraintTop_toBottomOf="@+id/player_name" />
+
+    <ImageView
+        android:id="@+id/player_dislike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_dislike"
+        app:layout_constraintStart_toStartOf="@+id/player_card_view"
+        app:layout_constraintTop_toTopOf="@+id/player_name" />
+
+    <ImageView
+        android:id="@+id/player_like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_like"
+        app:layout_constraintEnd_toEndOf="@+id/player_card_view"
+        app:layout_constraintTop_toTopOf="@+id/player_name" />
+
+    <SeekBar
+        android:id="@+id/player_seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/player_card_view"
+        app:layout_constraintStart_toStartOf="@+id/player_card_view"
+        app:layout_constraintTop_toBottomOf="@+id/player_artist" />
+
+    <ImageView
+        android:id="@+id/player_play"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/baseline_pause_circle_filled"
+        app:layout_constraintEnd_toStartOf="@+id/player_next"
+        app:layout_constraintStart_toEndOf="@+id/player_previous"
+        app:layout_constraintTop_toBottomOf="@+id/player_seek_bar" />
+
+    <ImageView
+        android:id="@+id/player_previous"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="35dp"
+        android:src="@drawable/baseline_skip_previous"
+        app:layout_constraintBottom_toBottomOf="@+id/player_play"
+        app:layout_constraintStart_toEndOf="@+id/player_shuffle"
+        app:layout_constraintTop_toTopOf="@+id/player_play" />
+
+    <ImageView
+        android:id="@+id/player_next"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="35dp"
+        android:src="@drawable/baseline_skip_next"
+        app:layout_constraintBottom_toBottomOf="@+id/player_play"
+        app:layout_constraintEnd_toStartOf="@+id/player_repeat"
+        app:layout_constraintTop_toTopOf="@+id/player_play" />
+
+    <ImageView
+        android:id="@+id/player_repeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_repeat"
+        app:layout_constraintBottom_toBottomOf="@+id/player_next"
+        app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
+        app:layout_constraintTop_toTopOf="@+id/player_next" />
+
+    <ImageView
+        android:id="@+id/player_shuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_shuffle"
+        app:layout_constraintBottom_toBottomOf="@+id/player_previous"
+        app:layout_constraintStart_toStartOf="@+id/player_seek_bar"
+        app:layout_constraintTop_toTopOf="@+id/player_previous" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
