@@ -61,7 +61,6 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
 
     private fun getAlbumArt(filePath: String, albumId: Long): Uri {
         val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
-        Log.d("!@#", filePath)
         return ContentUris.withAppendedId(sArtworkUri, albumId)
     }
 

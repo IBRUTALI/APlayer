@@ -32,9 +32,8 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
             musicItemDuration.text = musicList[position].duration
             Glide.with(holder.itemView.context)
                 .load(musicList[position].artUri)
-                .placeholder(R.drawable.baseline_undefined)
-                .error(R.drawable.baseline_undefined)
-                .centerCrop()
+                .placeholder(R.drawable.im_default)
+                .error(R.drawable.im_default)
                 .into(musicItemImage)
         }
 

@@ -10,7 +10,7 @@
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/sort"
         android:title="@string/app_name"
-        android:icon="@drawable/baseline_sort_24"
+        android:icon="@drawable/baseline_sort"
         app:iconTint="?attr/colorPrimaryVariant"
         app:showAsAction="always"/>
     <item android:id="@+id/layout_style"
