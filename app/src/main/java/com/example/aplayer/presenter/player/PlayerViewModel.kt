@@ -10,4 +10,12 @@ import io.reactivex.Single
 
 class PlayerViewModel() : ViewModel() {
 
+    fun playMusic() {
+
+    }
+
+    fun musicIsPlaying() {
+
+    }
+
 }

@@ -8,8 +8,8 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.aplayer.presenter.main.MainFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_playerFragment"
             app:destination="@id/playerFragment" />
@@ -17,6 +17,5 @@
     <fragment
         android:id="@+id/playerFragment"
         android:name="com.example.aplayer.presenter.player.PlayerFragment"
-        android:label="fragment_player"
         tools:layout="@layout/fragment_player" />
 </navigation>

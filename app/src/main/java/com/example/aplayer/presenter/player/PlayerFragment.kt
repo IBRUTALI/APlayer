@@ -45,9 +45,8 @@ class PlayerFragment : Fragment() {
         with(binding) {
             Glide.with(requireContext())
                 .load(music.artUri)
-                .placeholder(R.drawable.baseline_undefined)
-                .error(R.drawable.baseline_undefined)
                 .centerCrop()
+                .placeholder(R.drawable.im_default)
                 .into(playerAlbumArt)
 
             playerName.text = music.name

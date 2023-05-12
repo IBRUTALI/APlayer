@@ -28,12 +28,12 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
 
         with(holder.binding) {
             musicItemTitle.text = musicList[position].name
-            musicItemArtist.text = musicList[position].artist
             musicItemDuration.text = musicList[position].duration
             Glide.with(holder.itemView.context)
                 .load(musicList[position].artUri)
                 .placeholder(R.drawable.im_default)
                 .error(R.drawable.im_default)
+                .centerCrop()
                 .into(musicItemImage)
         }
 

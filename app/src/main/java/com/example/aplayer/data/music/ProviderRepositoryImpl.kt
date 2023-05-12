@@ -78,10 +78,12 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
         var name = music.name?.replace("_", " ")
         name = name?.replace(".mp3", "")
         name = name?.replace(".m4a", "")
-        val artist = if(music.artist == null || music.artist == "<unknown>") {
-            "Неизвестно"
+        val artist: String?
+        if(music.artist == null || music.artist == "<unknown>") {
+            artist = "Неизвестно"
         } else {
-            music.artist.replaceFirstChar { char -> char.uppercaseChar() }
+            artist = music.artist.replaceFirstChar { char -> char.uppercaseChar() }
+            name = "$artist - $name"
         }
         return music.copy(
             duration = duration,

@@ -3,11 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profile"
+    android:label="Профиль"
     app:startDestination="@id/profileFragment">
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.aplayer.presenter.profile.ProfileFragment"
-        android:label="fragment_profile"
+        android:label="Профиль"
         tools:layout="@layout/fragment_profile" />
 </navigation>
