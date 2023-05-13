@@ -11,14 +11,20 @@ import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.aplayer.R
+import com.example.aplayer.Repositories
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.utils.viewModelCreator
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 class PlayerFragment : Fragment() {
     private var mBinding: FragmentPlayerBinding? = null
     private val binding get() = mBinding!!
     private val musicList = emptyList<Music>()
-    private var mediaPlayer = MediaPlayer()
+    private val playerViewModel by lazy { PlayerViewModel(activity?.application!!) }
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,29 +57,25 @@ class PlayerFragment : Fragment() {
 
             playerName.text = music.name
             playerArtist.text = music.artist
-            var length = mediaPlayer.currentPosition
             playerPlay.setOnClickListener {
-                if(mediaPlayer.isPlaying) {
-                    mediaPlayer.stop()
-                    length = mediaPlayer.currentPosition
+                if(playerViewModel.musicIsPlaying()) {
+                    val dispose = playerViewModel.stopMusic()
+                        .subscribeOn(Schedulers.newThread())
+                        .subscribe {}
+                    compositeDisposable.add(dispose)
                     playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
                 }
                 else {
-                    mediaPlayer.prepare()
-                    mediaPlayer.setOnPreparedListener {
-                        mediaPlayer.seekTo(length)
-                        mediaPlayer.start()
+                    val dispose = playerViewModel.playMusic()
+                        .subscribeOn(Schedulers.newThread())
+                        .subscribe {}
+                    compositeDisposable.add(dispose)
                         playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
-                    }
                 }
             }
 
 
         }
-
-    }
-
-    private fun mediaPlayerListener() {
 
     }
 
@@ -87,7 +89,7 @@ class PlayerFragment : Fragment() {
         binding.playerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if(fromUser) {
-                    mediaPlayer.seekTo(progress)
+                    playerViewModel.getMediaPlayer().seekTo(progress)
                     Log.d("!@#", progress.toString())
                 }
             }
@@ -106,10 +108,16 @@ class PlayerFragment : Fragment() {
 //    }
 
     private fun createMediaPlayer() {
-        val musicUri = getMusicFromBundle().uri
-        mediaPlayer = MediaPlayer.create(requireContext(), musicUri)
-        mediaPlayer.start()
-        setSeekBarProgress(0, mediaPlayer.duration)
+        playerViewModel.initMediaPlayer(getMusicFromBundle())
+        playerViewModel.getMediaPlayer().start()
+        setSeekBarProgress(0, playerViewModel.getMediaPlayer().duration)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        compositeDisposable.dispose()
+        playerViewModel.closePlayer()
+
     }
 
     override fun onDestroy() {

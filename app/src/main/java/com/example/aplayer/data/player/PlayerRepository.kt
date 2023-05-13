@@ -1,22 +1,30 @@
 package com.example.aplayer.data.player
 
+import android.media.MediaPlayer
+import com.example.aplayer.domain.music.model.Music
+import io.reactivex.Completable
+import io.reactivex.Observable
+
 interface PlayerRepository {
 
-    fun playMusic()
+    fun playMusic(): Observable<Music>
 
-    fun stopMusic()
+    fun stopMusic(): Observable<Music>
 
-    fun seekMusic()
+    fun seekMusic(progress: Int): Completable
 
     fun repeatMusic()
 
     fun shuffleMusic()
 
-    fun likeMusic()
+    fun skipMusic(): Observable<Music>
 
-    fun dislikeMusic()
+    fun previousMusic(): Observable<Music>
 
-    fun skipMusic()
+    fun isPlaying(): Boolean
 
-    fun previousMusic()
+    fun initMediaPlayer(music: Music)
+
+    fun getMediaPlayer(): MediaPlayer
+
 }

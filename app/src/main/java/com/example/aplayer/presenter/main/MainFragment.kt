@@ -7,15 +7,16 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.MenuHost
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplayer.R
+import com.example.aplayer.Repositories
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.adapter.MainAdapter
+import com.example.aplayer.utils.viewModelCreator
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -23,7 +24,7 @@ class MainFragment : Fragment() {
     private var mBinding: FragmentMainBinding? = null
     private val binding get() = mBinding!!
     private val adapter by lazy { MainAdapter() }
-    private val viewModel by lazy { MainViewModel(activity?.application!!) }
+    private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
     private var indexState: Int = -1
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
