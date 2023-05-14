@@ -2,7 +2,6 @@ package com.example.aplayer.data.player
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.util.Log
 import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -44,6 +43,7 @@ class PlayerRepositoryImpl(
     }
 
     override fun repeatMusic() {
+        mediaPlayer?.isLooping = !mediaPlayer?.isLooping!!
     }
 
     override fun shuffleMusic() {

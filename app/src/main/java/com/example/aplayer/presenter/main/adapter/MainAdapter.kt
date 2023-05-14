@@ -39,7 +39,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
 
         holder.itemView.setOnClickListener {
             if (onClickListener != null) {
-                onClickListener!!.onClick(position, musicList[position] )
+                onClickListener!!.onClick(position, musicList as ArrayList<Music>)
             }
         }
 
@@ -50,7 +50,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     }
 
     interface OnClickListener {
-        fun onClick(position: Int, model: Music)
+        fun onClick(position: Int, list: ArrayList<Music>)
     }
 
     fun setList(list: List<Music>) {

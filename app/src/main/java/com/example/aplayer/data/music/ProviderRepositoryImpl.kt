@@ -7,6 +7,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.net.toUri
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.utils.parseDuration
 import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 
@@ -69,12 +70,7 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
     }
 
     private fun parseMusic(music: Music): Music {
-        val duration = if(music.duration != null) String.format(
-            "%d:%02d",
-            TimeUnit.MILLISECONDS.toMinutes(music.duration.toLong()),
-            TimeUnit.MILLISECONDS.toSeconds(music.duration.toLong()) -
-                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(music.duration.toLong()))
-        ) else "0:00"
+        val duration = parseDuration(music.duration?.toInt())
         var name = music.name?.replace("_", " ")
         name = name?.replace(".mp3", "")
         name = name?.replace(".m4a", "")

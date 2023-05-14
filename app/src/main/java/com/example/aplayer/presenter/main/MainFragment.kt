@@ -59,9 +59,10 @@ class MainFragment : Fragment() {
 
     private fun itemClickListener() {
         adapter.setOnClickListener(object : MainAdapter.OnClickListener {
-            override fun onClick(position: Int, model: Music) {
+            override fun onClick(position: Int, list: ArrayList<Music>) {
                 val bundle = Bundle()
-                bundle.putSerializable("music", model)
+                bundle.putParcelableArrayList("music", list)
+                bundle.putInt("position", position)
                 findNavController().navigate(R.id.action_mainFragment_to_playerFragment, bundle)
             }
         })

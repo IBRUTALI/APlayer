@@ -12,7 +12,7 @@
         android:id="@+id/player_card_view"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="50dp"
         app:cardCornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,6 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_dislike"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toTopOf="@+id/player_name" />
 
@@ -68,6 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_like"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
         app:layout_constraintTop_toTopOf="@+id/player_name" />
 
@@ -76,9 +78,34 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:scaleX="1.12"
+        android:scaleY="1.12"
+        android:thumbTint="?attr/colorPrimary"
+        android:progressBackgroundTint="?attr/colorPrimaryVariant"
+        android:progressTint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toBottomOf="@+id/player_artist" />
+
+    <TextView
+        android:id="@+id/leftDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/player_seek_bar"
+        app:layout_constraintTop_toBottomOf="@+id/player_seek_bar" />
+
+    <TextView
+        android:id="@+id/rightDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
+        app:layout_constraintTop_toBottomOf="@+id/player_seek_bar" />
 
     <ImageView
         android:id="@+id/player_play"
@@ -88,7 +115,8 @@
         android:src="@drawable/baseline_pause_circle_filled"
         app:layout_constraintEnd_toStartOf="@+id/player_next"
         app:layout_constraintStart_toEndOf="@+id/player_previous"
-        app:layout_constraintTop_toBottomOf="@+id/player_seek_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/player_seek_bar"
+        app:tint="?attr/colorPrimary" />
 
     <ImageView
         android:id="@+id/player_previous"
@@ -96,6 +124,7 @@
         android:layout_height="30dp"
         android:layout_marginStart="35dp"
         android:src="@drawable/baseline_skip_previous"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
         app:layout_constraintStart_toEndOf="@+id/player_shuffle"
         app:layout_constraintTop_toTopOf="@+id/player_play" />
@@ -106,6 +135,7 @@
         android:layout_height="30dp"
         android:layout_marginEnd="35dp"
         android:src="@drawable/baseline_skip_next"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
         app:layout_constraintEnd_toStartOf="@+id/player_repeat"
         app:layout_constraintTop_toTopOf="@+id/player_play" />
@@ -115,6 +145,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_repeat"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_next"
         app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
         app:layout_constraintTop_toTopOf="@+id/player_next" />
@@ -124,6 +155,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_shuffle"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_previous"
         app:layout_constraintStart_toStartOf="@+id/player_seek_bar"
         app:layout_constraintTop_toTopOf="@+id/player_previous" />
