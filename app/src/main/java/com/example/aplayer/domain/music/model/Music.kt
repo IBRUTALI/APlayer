@@ -6,15 +6,15 @@ import android.os.Parcelable
 import java.io.Serializable
 
 data class Music(
-    val id: Int ?= null,
-    val artUri: Uri ?= null,
-    val uri: Uri ?= null,
-    val data: String ?= null,
-    val artist: String?= "Неизвестно",
-    val size: String?= null,
-    val name: String?= null,
-    val duration: String?= null
-    ) : Parcelable {
+    val id: Int? = null,
+    val artUri: Uri? = null,
+    val uri: Uri? = null,
+    val data: String? = null,
+    val artist: String? = "Неизвестно",
+    val size: String? = null,
+    val name: String? = null,
+    val duration: String? = null
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readParcelable(Uri::class.java.classLoader),

@@ -2,10 +2,9 @@ package com.example.aplayer.presenter.player
 
 import android.app.Application
 import android.media.MediaPlayer
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.example.aplayer.data.player.PlayerRepositoryImpl
+import com.example.aplayer.domain.player.PlayerRepositoryImpl
 import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Completable
 import io.reactivex.Observable

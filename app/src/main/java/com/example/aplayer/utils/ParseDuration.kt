@@ -2,14 +2,24 @@ package com.example.aplayer.utils
 
 import java.util.concurrent.TimeUnit
 
-fun parseDuration(duration: Int?): String {
-   return if (duration != null){
-       String.format(
-           "%d:%02d",
-           TimeUnit.MILLISECONDS.toMinutes(duration.toLong()),
-           TimeUnit.MILLISECONDS.toSeconds(duration.toLong()) -
-                   TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration.toLong()))
-       )
-   } else "0:00"
+fun Int.secondsToTime(): String {
+    return if (this != null) {
+        String.format(
+            "%d:%02d",
+            TimeUnit.MILLISECONDS.toMinutes(toLong()),
+            TimeUnit.MILLISECONDS.toSeconds(toLong()) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(toLong()))
+        )
+    } else "0:00"
+}
 
+fun Long.secondsToTime(): String {
+    return if (this != null) {
+        String.format(
+            "%d:%02d",
+            TimeUnit.MILLISECONDS.toMinutes(this),
+            TimeUnit.MILLISECONDS.toSeconds(this) -
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(this))
+        )
+    } else "0:00"
 }

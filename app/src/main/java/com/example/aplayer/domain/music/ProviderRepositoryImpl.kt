@@ -1,15 +1,13 @@
-package com.example.aplayer.data.music
+package com.example.aplayer.domain.music
 
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
-import androidx.core.net.toUri
+import com.example.aplayer.data.music.ProviderRepository
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.utils.parseDuration
+import com.example.aplayer.utils.secondsToTime
 import io.reactivex.Single
-import java.util.concurrent.TimeUnit
 
 
 class ProviderRepositoryImpl(private val context: Context) : ProviderRepository {
@@ -33,11 +31,12 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                                 val name =
                                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME))
                                 val duration =
-                                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+                                    cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+                                        .secondsToTime()
                                 val size =
                                     cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
                                 val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                                val artUri = getAlbumArt(data, albumId)
+                                val artUri = getAlbumArt(albumId)
                                 val musicUri = getMusicUriById(musicId)
                                 val music = Music(
                                     artUri = artUri,
@@ -60,7 +59,7 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
         }
     }
 
-    private fun getAlbumArt(filePath: String, albumId: Long): Uri {
+    private fun getAlbumArt(albumId: Long): Uri {
         val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
         return ContentUris.withAppendedId(sArtworkUri, albumId)
     }
@@ -70,7 +69,6 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
     }
 
     private fun parseMusic(music: Music): Music {
-        val duration = parseDuration(music.duration?.toInt())
         var name = music.name?.replace("_", " ")
         name = name?.replace(".mp3", "")
         name = name?.replace(".m4a", "")
@@ -82,7 +80,6 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
             name = "$artist - $name"
         }
         return music.copy(
-            duration = duration,
             name = name,
             artist = artist
         )

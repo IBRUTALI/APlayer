@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.aplayer.R
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.utils.parseDuration
+import com.example.aplayer.utils.secondsToTime
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -26,7 +26,7 @@ class PlayerFragment : Fragment() {
     private val compositeDisposable = CompositeDisposable()
     private val audioDisposable = CompositeDisposable()
 
-   private fun init() {
+    private fun init() {
         playerViewModel.audioPosition.value = getPositionFromBundle()
         musicList = getMusicFromBundle()
     }
@@ -90,19 +90,23 @@ class PlayerFragment : Fragment() {
                         .subscribeOn(Schedulers.newThread())
                         .subscribe {}
                     audioDisposable.clear()
-                    seekBarObserver()
                     compositeDisposable.add(dispose)
+                    seekBarObserver()
                     playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
                 }
             }
 
             playerNext.setOnClickListener {
-                if (0 <= playerViewModel.audioPosition.value!! && playerViewModel.audioPosition.value!! < musicList.size - 1)
+                if (0 <= playerViewModel.audioPosition.value!! &&
+                    playerViewModel.audioPosition.value!! < musicList.size - 1
+                )
                     skipMusic()
             }
 
             playerPrevious.setOnClickListener {
-                if (0 < playerViewModel.audioPosition.value!! && playerViewModel.audioPosition.value!! <= musicList.size - 1)
+                if (0 < playerViewModel.audioPosition.value!! &&
+                    playerViewModel.audioPosition.value!! <= musicList.size - 1
+                )
                     previousMusic()
             }
 
@@ -134,6 +138,7 @@ class PlayerFragment : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     playerViewModel.getMediaPlayer().seekTo(progress)
+                    binding.playerSeekBar.progress = progress
                 }
             }
 
@@ -153,22 +158,21 @@ class PlayerFragment : Fragment() {
     }
 
     private fun seekBarObserver() {
+        Log.d("!@#", "is playing: ${playerViewModel.musicIsPlaying()}")
         val dispose = initSeekBar()
             .subscribeOn(Schedulers.computation())
             .delay(1000, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { progress ->
                 binding.playerSeekBar.progress = progress
-                binding.leftDuration.text = parseDuration(progress)
+                binding.leftDuration.text = progress.secondsToTime()
             }
         audioDisposable.add(dispose)
     }
 
     private fun initSeekBar(): Observable<Int> {
-        //setSeekBarProgress(0, playerViewModel.getMediaPlayer().duration)
         binding.playerSeekBar.max = playerViewModel.getMediaPlayer().duration
         return Observable.create { subscriber ->
-            Log.d("!@#", "is playing: ${playerViewModel.musicIsPlaying()}")
             while (playerViewModel.musicIsPlaying()) {
                 val progress = playerViewModel.getMediaPlayer().currentPosition
                 subscriber.onNext(progress)
@@ -186,8 +190,10 @@ class PlayerFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+
         compositeDisposable.dispose()
-        playerViewModel.closePlayer()
+        audioDisposable.dispose()
+        playerViewModel.getMediaPlayer().release()
 
     }
 

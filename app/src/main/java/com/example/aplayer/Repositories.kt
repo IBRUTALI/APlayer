@@ -2,7 +2,7 @@ package com.example.aplayer
 
 import android.content.Context
 import com.example.aplayer.data.music.ProviderRepository
-import com.example.aplayer.data.music.ProviderRepositoryImpl
+import com.example.aplayer.domain.music.ProviderRepositoryImpl
 
 object Repositories {
 

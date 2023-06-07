@@ -1,7 +1,8 @@
-package com.example.aplayer.data.player
+package com.example.aplayer.domain.player
 
 import android.content.Context
 import android.media.MediaPlayer
+import com.example.aplayer.data.player.PlayerRepository
 import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -62,7 +63,7 @@ class PlayerRepositoryImpl(
     }
 
     override fun isPlaying(): Boolean {
-        return mediaPlayer?.isPlaying ?: false
+            return mediaPlayer?.isPlaying ?: false
     }
 
     override fun initMediaPlayer(music: Music) {
