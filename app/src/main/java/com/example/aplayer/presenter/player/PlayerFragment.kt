@@ -1,7 +1,11 @@
 package com.example.aplayer.presenter.player
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
-import android.util.Log
+import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,33 +15,47 @@ import com.bumptech.glide.Glide
 import com.example.aplayer.R
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.utils.secondsToTime
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.example.aplayer.domain.service.PlayerService
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
+
 
 class PlayerFragment : Fragment() {
     private var mBinding: FragmentPlayerBinding? = null
     private val binding get() = mBinding!!
-    private var musicList = emptyList<Music>()
-    private val playerViewModel by lazy { PlayerViewModel(activity?.application!!) }
+    private lateinit var musicList: ArrayList<Music>
+    private val playerViewModel by lazy { PlayerViewModel() }
     private val compositeDisposable = CompositeDisposable()
     private val audioDisposable = CompositeDisposable()
+    private var player: PlayerService? = null
+    private var isServiceBound = false
+
 
     private fun init() {
-        playerViewModel.audioPosition.value = getPositionFromBundle()
         musicList = getMusicFromBundle()
+        isServiceBound = playerViewModel.isBounded.value!!
+    }
+
+    private val serviceConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
+            player = binder.getService()
+            isServiceBound = true
+            playerViewModel.isBounded.value = true
+            //Toast.makeText(this, "Service Bound", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            isServiceBound = false
+            playerViewModel.isBounded.value = false
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
-        createMediaPlayer()
-        setupUI(playerViewModel.audioPosition.value!!)
-        setupButtons()
-        positionChangeObserver()
+        setupUI(getPositionFromBundle())
+        playAudio()
         seekBarChangeListener()
     }
 
@@ -50,14 +68,20 @@ class PlayerFragment : Fragment() {
         return binding.root
     }
 
-    private fun positionChangeObserver() {
-        playerViewModel.audioPosition.observe(viewLifecycleOwner) { position ->
-            if (position in getMusicFromBundle().indices) {
-                setupUI(position)
-                createMediaPlayer()
-            }
+    private fun playAudio() {
+        //Check is service is active
+        if (!isServiceBound!!) {
+            val playerIntent = Intent(requireContext(), PlayerService::class.java)
+            playerIntent.putParcelableArrayListExtra("Music list", musicList)
+            playerIntent.putExtra("Current position", getPositionFromBundle())
+            activity?.startService(playerIntent)
+            activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        } else {
+            //Service is active
+            //Send media with BroadcastReceiver
         }
     }
+
 
     private fun setupUI(position: Int) {
         val music = musicList[position]
@@ -75,69 +99,11 @@ class PlayerFragment : Fragment() {
 
     }
 
-    private fun setupButtons() {
-        with(binding) {
-            playerPlay.setOnClickListener {
-                if (playerViewModel.musicIsPlaying()) {
-                    val dispose = playerViewModel.stopMusic()
-                        .subscribeOn(Schedulers.newThread())
-                        .subscribe {}
-                    audioDisposable.dispose()
-                    compositeDisposable.add(dispose)
-                    playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
-                } else {
-                    val dispose = playerViewModel.playMusic()
-                        .subscribeOn(Schedulers.newThread())
-                        .subscribe {}
-                    audioDisposable.clear()
-                    compositeDisposable.add(dispose)
-                    seekBarObserver()
-                    playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
-                }
-            }
-
-            playerNext.setOnClickListener {
-                if (0 <= playerViewModel.audioPosition.value!! &&
-                    playerViewModel.audioPosition.value!! < musicList.size - 1
-                )
-                    skipMusic()
-            }
-
-            playerPrevious.setOnClickListener {
-                if (0 < playerViewModel.audioPosition.value!! &&
-                    playerViewModel.audioPosition.value!! <= musicList.size - 1
-                )
-                    previousMusic()
-            }
-
-            playerRepeat.setOnClickListener {
-                playerViewModel.repeatMusic()
-                if (playerViewModel.getMediaPlayer().isLooping) {
-                    playerRepeat.setImageResource(R.drawable.baseline_repeat_one)
-                } else playerRepeat.setImageResource(R.drawable.baseline_repeat)
-            }
-
-            playerShuffle.setOnClickListener {
-                playerViewModel.shuffleMusic()
-            }
-        }
-    }
-
-    private fun skipMusic() {
-        playerViewModel.skipMusic()
-        audioDisposable.dispose()
-    }
-
-    private fun previousMusic() {
-        playerViewModel.previousMusic()
-        audioDisposable.dispose()
-    }
-
     private fun seekBarChangeListener() {
         binding.playerSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    playerViewModel.getMediaPlayer().seekTo(progress)
+                    //playerViewModel.getMediaPlayer().seekTo(progress)
                     binding.playerSeekBar.progress = progress
                 }
             }
@@ -151,36 +117,7 @@ class PlayerFragment : Fragment() {
         })
     }
 
-    private fun createMediaPlayer() {
-        playerViewModel.initMediaPlayer(getMusicFromBundle()[playerViewModel.audioPosition.value!!])
-        playerViewModel.getMediaPlayer().start()
-        seekBarObserver()
-    }
-
-    private fun seekBarObserver() {
-        Log.d("!@#", "is playing: ${playerViewModel.musicIsPlaying()}")
-        val dispose = initSeekBar()
-            .subscribeOn(Schedulers.computation())
-            .delay(1000, TimeUnit.MILLISECONDS)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { progress ->
-                binding.playerSeekBar.progress = progress
-                binding.leftDuration.text = progress.secondsToTime()
-            }
-        audioDisposable.add(dispose)
-    }
-
-    private fun initSeekBar(): Observable<Int> {
-        binding.playerSeekBar.max = playerViewModel.getMediaPlayer().duration
-        return Observable.create { subscriber ->
-            while (playerViewModel.musicIsPlaying()) {
-                val progress = playerViewModel.getMediaPlayer().currentPosition
-                subscriber.onNext(progress)
-            }
-        }
-    }
-
-    private fun getMusicFromBundle(): List<Music> {
+    private fun getMusicFromBundle(): ArrayList<Music> {
         return arguments?.getParcelableArrayList("music")!!
     }
 
@@ -190,11 +127,8 @@ class PlayerFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-
         compositeDisposable.dispose()
         audioDisposable.dispose()
-        playerViewModel.getMediaPlayer().release()
-
     }
 
     override fun onDestroy() {

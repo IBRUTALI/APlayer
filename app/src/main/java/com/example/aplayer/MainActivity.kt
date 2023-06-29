@@ -1,6 +1,9 @@
 package com.example.aplayer
 
+import android.content.ComponentName
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -10,10 +13,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import com.example.aplayer.databinding.ActivityMainBinding
+import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.tabs.TabsFragment
 import java.util.regex.Pattern
 
@@ -23,14 +24,22 @@ class MainActivity : AppCompatActivity() {
     private val binding get() = mBinding!!
     private var navController: NavController? = null
     private val topLevelDestinations = setOf(getTabsDestination(), getSignInDestination())
+    private var player: PlayerService? = null
+    var serviceBound = false
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
-        override fun onFragmentViewCreated(fm: FragmentManager, f: Fragment, v: View, savedInstanceState: Bundle?) {
+        override fun onFragmentViewCreated(
+            fm: FragmentManager,
+            f: Fragment,
+            v: View,
+            savedInstanceState: Bundle?
+        ) {
             super.onFragmentViewCreated(fm, f, v, savedInstanceState)
             if (f is TabsFragment || f is NavHostFragment) return
             onNavControllerActivated(f.findNavController())
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Repositories.init(applicationContext)
@@ -73,7 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean = (navController?.navigateUp() ?: false) || super.onSupportNavigateUp()
+    override fun onSupportNavigateUp(): Boolean =
+        (navController?.navigateUp() ?: false) || super.onSupportNavigateUp()
 
     private fun prepareRootNavController(isSignedIn: Boolean, navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
@@ -99,10 +109,11 @@ class MainActivity : AppCompatActivity() {
         return navHost.navController
     }
 
-    private val destinationListener = NavController.OnDestinationChangedListener { _, destination, arguments ->
-        supportActionBar?.title = prepareTitle(destination.label, arguments)
-        supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
-    }
+    private val destinationListener =
+        NavController.OnDestinationChangedListener { _, destination, arguments ->
+            supportActionBar?.title = prepareTitle(destination.label, arguments)
+            supportActionBar?.setDisplayHomeAsUpEnabled(!isStartDestination(destination))
+        }
 
     private fun isStartDestination(destination: NavDestination?): Boolean {
         if (destination == null) return false
@@ -149,10 +160,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun getSignInDestination(): Int = R.id.signInFragment
 
+    private val serviceConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
+            player = binder.getService()
+            serviceBound = true
+            //Toast.makeText(this, "Service Bound", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            serviceBound = false
+        }
+    }
+
     override fun onDestroy() {
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
         super.onDestroy()
         mBinding = null
+        if (serviceBound) {
+            unbindService(serviceConnection)
+            //service is active
+            player?.stopSelf()
+        }
     }
 }

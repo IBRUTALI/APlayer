@@ -16,42 +16,43 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
         return Single.create { subscriber ->
             try {
                 val listMusic = ArrayList<Music>()
-                val contentResolver = context.contentResolver!!
+                val contentResolver = context.contentResolver
                 val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val audioCursor =
-                    contentResolver.query(uri, null, null, null, null)!!.use { cursor ->
-                        if (cursor.count > 0) {
-                            while (cursor.moveToNext()) {
-                                val data =
-                                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
-                                val albumId =
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
-                                val artist =
-                                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
-                                val name =
-                                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME))
-                                val duration =
-                                    cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
-                                        .secondsToTime()
-                                val size =
-                                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
-                                val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                                val artUri = getAlbumArt(albumId)
-                                val musicUri = getMusicUriById(musicId)
-                                val music = Music(
-                                    artUri = artUri,
-                                    uri = musicUri,
-                                    data = data,
-                                    artist = artist,
-                                    size = size,
-                                    name = name,
-                                    duration = duration
-                                )
-                                listMusic.add(parseMusic(music))
+                    contentResolver.query(uri, null, null, null, null).use { cursor ->
+                        cursor?.let {
+                            if (cursor.count > 0) {
+                                while (cursor.moveToNext()) {
+                                    val data =
+                                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA))
+                                    val albumId =
+                                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
+                                    val artist =
+                                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+                                    val name =
+                                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME))
+                                    val duration =
+                                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
+                                            .secondsToTime()
+                                    val size =
+                                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
+                                    val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                                    val artUri = getAlbumArt(albumId)
+                                    val musicUri = getMusicUriById(musicId)
+                                    val music = Music(
+                                        artUri = artUri,
+                                        uri = musicUri,
+                                        data = data,
+                                        artist = artist,
+                                        size = size,
+                                        name = name,
+                                        duration = duration
+                                    )
+                                    listMusic.add(parseMusic(music))
+                                }
+                                subscriber.onSuccess(listMusic)
                             }
-                            subscriber.onSuccess(listMusic)
                         }
-
                     }
             } catch (e: IllegalStateException) {
                 subscriber.onError(e)
