@@ -17,7 +17,7 @@ import com.example.aplayer.databinding.ActivityMainBinding
 import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.tabs.TabsFragment
 import java.util.regex.Pattern
-
+const val Broadcast_PLAY_NEW_AUDIO = "com.example.aplayer.PlayNewAudio"
 class MainActivity : AppCompatActivity() {
 
     private var mBinding: ActivityMainBinding? = null

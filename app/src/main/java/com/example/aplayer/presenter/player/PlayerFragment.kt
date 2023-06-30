@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
 import com.example.aplayer.R
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
@@ -70,7 +71,7 @@ class PlayerFragment : Fragment() {
 
     private fun playAudio() {
         //Check is service is active
-        if (!isServiceBound!!) {
+        if (!isServiceBound) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
             playerIntent.putParcelableArrayListExtra("Music list", musicList)
             playerIntent.putExtra("Current position", getPositionFromBundle())
@@ -79,6 +80,8 @@ class PlayerFragment : Fragment() {
         } else {
             //Service is active
             //Send media with BroadcastReceiver
+            val broadcastIntent = Intent(Broadcast_PLAY_NEW_AUDIO)
+            activity?.sendBroadcast(broadcastIntent)
         }
     }
 
