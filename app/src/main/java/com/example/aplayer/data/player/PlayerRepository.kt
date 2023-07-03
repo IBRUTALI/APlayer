@@ -16,9 +16,9 @@ interface PlayerRepository {
 
     fun shuffleMusic()
 
-    fun skipMusic()
+    fun skipToNext()
 
-    fun previousMusic()
+    fun skipToPrevious()
 
     fun isPlaying(): Boolean
 

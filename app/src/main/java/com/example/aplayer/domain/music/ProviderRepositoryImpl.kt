@@ -37,8 +37,8 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                                     val size =
                                         cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
                                     val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                                    val artUri = getAlbumArt(albumId)
-                                    val musicUri = getMusicUriById(musicId)
+                                    val artUri = getAlbumArt(albumId).toString()
+                                    val musicUri = getMusicUriById(musicId).toString()
                                     val music = Music(
                                         artUri = artUri,
                                         uri = musicUri,
@@ -71,9 +71,9 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
 
     private fun parseMusic(music: Music): Music {
         var name = music.name?.replace("_", " ")
+        val artist: String?
         name = name?.replace(".mp3", "")
         name = name?.replace(".m4a", "")
-        val artist: String?
         if(music.artist == null || music.artist == "<unknown>") {
             artist = "Неизвестно"
         } else {

@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.session.MediaSessionManager
+import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -22,6 +23,7 @@ import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.*
 import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
 import com.example.aplayer.R
+import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.data.player.PlayerRepository
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.utils.PlaybackStatus
@@ -33,7 +35,9 @@ const val ACTION_PAUSE = "com.example.aplayer.ACTION_PAUSE"
 const val ACTION_PREVIOUS = "com.example.aplayer.ACTION_PREVIOUS"
 const val ACTION_NEXT = "com.example.aplayer.ACTION_NEXT"
 const val ACTION_STOP = "com.example.aplayer.ACTION_STOP"
-private const val MEDIA_CHANNEL_ID = "media_playback_channel"
+const val MEDIA_CHANNEL_ID = "media_playback_channel"
+//AudioPlayer notification ID
+const val NOTIFICATION_ID = 101
 
 class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -47,17 +51,15 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     private var currentPosition = -1
     private val iBinder = LocalBinder()
     private lateinit var audioManager: AudioManager
+    private val storageUtil = StorageUtil(this)
+    //Call
     private var ongoingCall = false
     private var phoneStateListener: PhoneStateListener? = null
     private lateinit var telephonyManager: TelephonyManager
-
     //MediaSession
     private var mediaSessionManager: MediaSessionManager? = null
     private lateinit var mediaSession: MediaSessionCompat
     private var transportControls: MediaControllerCompat.TransportControls? = null
-
-    //AudioPlayer notification ID
-    private val NOTIFICATION_ID = 101
 
     override fun onBind(intent: Intent?): IBinder = iBinder
 
@@ -71,7 +73,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         //ACTION_AUDIO_BECOMING_NOISY -- change in audio outputs -- BroadcastReceiver
         registerBecomingNoisyReceiver()
         //Listen for new Audio to play -- BroadcastReceiver
-        register_playNewAudio()
+        registerPlayNewAudio()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -79,8 +81,9 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 createChannel()
             }
-            musicList = intent?.extras?.getParcelableArrayList("Music list") ?: emptyList()
-            currentPosition = intent?.extras?.getInt("Current position", -1) ?: -1
+            storageUtil.loadAudio()
+            musicList = storageUtil.loadAudio()
+            currentPosition = storageUtil.loadAudioIndex()
             if (currentPosition != -1 && currentPosition < musicList.size) {
                 //index is in a valid range
                 activeAudio = musicList[currentPosition]
@@ -121,7 +124,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun playMusic() {
         if (!mediaPlayer.isPlaying) {
-            mediaPlayer.start();
+            mediaPlayer.start()
         }
     }
 
@@ -157,14 +160,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     override fun shuffleMusic() {
     }
 
-    override fun skipMusic() {
-
-    }
-
-    override fun previousMusic() {
-
-    }
-
     override fun isPlaying(): Boolean {
         return mediaPlayer.isPlaying
     }
@@ -180,7 +175,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         mediaPlayer.reset()
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
         try {
-            activeAudio.uri?.let { mediaPlayer.setDataSource(this, it) }
+            activeAudio.uri?.let { mediaPlayer.setDataSource(this, Uri.parse(it)) }
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -249,11 +244,13 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 mediaPlayer.release()
                 _mediaPlayer = null
             }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->             // Lost focus for a short time, but we have to stop
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
+                // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media player because playback
                 // is likely to resume
                 if (mediaPlayer.isPlaying) mediaPlayer.pause()
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->             // Lost focus for a short time, but it's ok to keep playing
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
+                // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
                 if (mediaPlayer.isPlaying) mediaPlayer.setVolume(0.1f, 0.1f)
         }
@@ -300,7 +297,8 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                         pauseMusic()
                         ongoingCall = true
                     }
-                    TelephonyManager.CALL_STATE_IDLE ->                   // Phone idle. Start playing.
+                    // Phone idle. Start playing.
+                    TelephonyManager.CALL_STATE_IDLE ->
                         if (_mediaPlayer != null) {
                             if (ongoingCall) {
                                 ongoingCall = false
@@ -321,10 +319,10 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     private val playNewAudio: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
 
-            currentPosition = intent.extras?.getInt("Current position", 0) ?: 0
+            currentPosition = storageUtil.loadAudioIndex()
             if (currentPosition != -1 && currentPosition < musicList.size) {
                 //index is in a valid range
-                musicList = intent.extras?.getParcelableArrayList("Music list") ?: emptyList()
+                activeAudio = musicList[currentPosition]
             } else {
                 stopSelf()
             }
@@ -339,8 +337,8 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         }
     }
 
-    private fun register_playNewAudio() {
-        //Register playNewMedia receiver
+    private fun registerPlayNewAudio() {
+        //Register playNewAudio receiver
         val filter = IntentFilter(Broadcast_PLAY_NEW_AUDIO)
         registerReceiver(playNewAudio, filter)
     }
@@ -443,7 +441,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         )
     }
 
-    private fun skipToNext() {
+    override fun skipToNext() {
         if (currentPosition == musicList.size - 1) {
             //if last in playlist
             currentPosition = 0
@@ -454,13 +452,14 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         }
 
         //Update stored index
+        storageUtil.storeAudioIndex(currentPosition)
         stopMusic()
         //reset mediaPlayer
         mediaPlayer.reset()
         initMediaPlayer()
     }
 
-    private fun skipToPrevious() {
+    override fun skipToPrevious() {
         if (currentPosition == 0) {
             //if first in playlist
             //set index to the last of audioList
@@ -472,6 +471,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         }
 
         //Update stored index
+        storageUtil.storeAudioIndex(currentPosition)
         stopMusic()
         //reset mediaPlayer
         mediaPlayer.reset()
@@ -480,19 +480,19 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     private fun buildNotification(playbackStatus: PlaybackStatus) {
         var notificationAction = R.drawable.baseline_pause_circle_filled //needs to be initialized
-        var play_pauseAction: PendingIntent? = null
+        var playPauseAction: PendingIntent? = null
 
         //Build a new notification according to the current state of the MediaPlayer
         when (playbackStatus) {
             PlaybackStatus.PLAYING -> {
                 notificationAction = R.drawable.baseline_pause_circle_filled
                 //create the pause action
-                play_pauseAction = playbackAction(1)
+                playPauseAction = playbackAction(1)
             }
             PlaybackStatus.PAUSED -> {
                 notificationAction = R.drawable.baseline_play_circle_filled
                 //create the play action
-                play_pauseAction = playbackAction(0)
+                playPauseAction = playbackAction(0)
             }
         }
         // Create a new Notification
@@ -514,7 +514,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 // Add playback actions
                 .addAction(R.drawable.baseline_skip_previous, "previous", playbackAction(3))
                 .addAction(
-                    notificationAction, "pause", play_pauseAction
+                    notificationAction, "pause", playPauseAction
                 )
                 .addAction(
                     R.drawable.baseline_skip_next, "next", playbackAction(2)
@@ -556,7 +556,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 playbackAction.action = ACTION_PREVIOUS
                 return PendingIntent.getService(this, actionNumber, playbackAction, 0)
             }
-            else -> {}
         }
         return null
     }
@@ -577,6 +576,11 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         }
     }
 
+    inner class LocalBinder : Binder() {
+        fun getService(): PlayerService {
+            return this@PlayerService
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -584,18 +588,19 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             stopMusic()
             mediaPlayer.release()
         }
+
         removeAudioFocus()
         removeNotification()
+
+        if (phoneStateListener != null) {
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
+        }
 
         //unregister BroadcastReceivers
         unregisterReceiver(becomingNoisyReceiver)
         unregisterReceiver(playNewAudio)
-    }
 
-    inner class LocalBinder : Binder() {
-        fun getService(): PlayerService {
-            return this@PlayerService
-        }
+       storageUtil.clearCachedAudioPlaylist()
     }
 
 }

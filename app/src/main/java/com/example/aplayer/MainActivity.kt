@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private var navController: NavController? = null
     private val topLevelDestinations = setOf(getTabsDestination(), getSignInDestination())
     private var player: PlayerService? = null
-    var serviceBound = false
+    private var isServiceBound = false
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentViewCreated(
@@ -37,6 +37,19 @@ class MainActivity : AppCompatActivity() {
             super.onFragmentViewCreated(fm, f, v, savedInstanceState)
             if (f is TabsFragment || f is NavHostFragment) return
             onNavControllerActivated(f.findNavController())
+        }
+    }
+
+    private val serviceConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
+            player = binder.getService()
+            isServiceBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            isServiceBound = false
         }
     }
 
@@ -52,27 +65,6 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
     }
-
-//    private fun setupNavigation() {
-//        navController = Navigation.findNavController(this, R.id.nav_host)
-//        val appBarConfiguration = AppBarConfiguration(
-//            setOf(
-//                R.id.tabsFragment
-//            )
-//        )
-//        binding.toolbar.mainToolbar.apply {
-//            setupWithNavController(navController, appBarConfiguration)
-//            inflateMenu(R.menu.main_menu)
-//            navController.addOnDestinationChangedListener { _, destination, _ ->
-//                visibility = if (destination.id == R.id.splashFragment) {
-//                    GONE
-//                } else
-//                    VISIBLE
-//            }
-//
-//        }
-//
-//    }
 
     override fun onBackPressed() {
         if (isStartDestination(navController?.currentDestination)) {
@@ -160,26 +152,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun getSignInDestination(): Int = R.id.signInFragment
 
-    private val serviceConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
-            player = binder.getService()
-            serviceBound = true
-            //Toast.makeText(this, "Service Bound", Toast.LENGTH_SHORT).show()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-            serviceBound = false
-        }
-    }
-
     override fun onDestroy() {
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
         super.onDestroy()
         mBinding = null
-        if (serviceBound) {
+        if (isServiceBound) {
             unbindService(serviceConnection)
             //service is active
             player?.stopSelf()
