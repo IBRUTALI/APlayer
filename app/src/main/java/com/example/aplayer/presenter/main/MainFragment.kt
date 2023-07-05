@@ -81,12 +81,12 @@ class MainFragment : Fragment() {
 
     private fun layoutStyleDialog() {
         val choiceList = arrayOf(
-            "Список",
-            "Плитка"
+            getString(R.string.list),
+            getString(R.string.tile)
         )
         val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Выберете стиль")
-            .setPositiveButton("Ок") { _, _ ->
+            .setTitle(getString(R.string.choose_list_style))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
                 when (indexState) {
                     0 -> {
                         binding.mainRecyclerView.layoutManager =
@@ -100,7 +100,7 @@ class MainFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("Отмена") { _, _ -> }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
             .setSingleChoiceItems(choiceList, indexState) { _, index ->
                 when (index) {
                     0 -> {

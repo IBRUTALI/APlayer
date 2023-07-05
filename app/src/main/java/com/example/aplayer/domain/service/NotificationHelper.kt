@@ -6,13 +6,22 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.RequiresApi
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.media.app.NotificationCompat.*
 import androidx.navigation.NavDeepLinkBuilder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.aplayer.MainActivity
 import com.example.aplayer.R
 import com.example.aplayer.domain.music.model.Music
@@ -71,17 +80,13 @@ class NotificationHelper(private val context: Context) {
                     .setShowActionsInCompactView(0, 1, 2)
             )
             .setColor(context.getColor(R.color.black_lite_200))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.baseline_play_circle_filled)
             .addAction(R.drawable.baseline_skip_previous, "previous", playbackAction(3))
-            .addAction(
-                notificationAction, "pause", playPauseAction
-            )
-            .addAction(
-                R.drawable.baseline_skip_next, "next", playbackAction(2)
-            )
+            .addAction(notificationAction, "pause", playPauseAction)
+            .addAction(R.drawable.baseline_skip_next, "next", playbackAction(2))
             .setOngoing(isPlaying)
             .setSound(null)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
     }
 
@@ -93,13 +98,38 @@ class NotificationHelper(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.createNotificationChannel(createChannel())
         }
+
         val contentIntent = createContentIntent()
 
         val notificationBuilder = buildNotification(playbackStatus, mediaSession)
             .setContentText(activeAudio.artist)
             .setContentTitle(activeAudio.name)
+            .setContentInfo(activeAudio.duration)
             .setContentIntent(contentIntent)
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+
+        var drawable = AppCompatResources.getDrawable(context, R.drawable.im_default)!!
+        Glide.with(context)
+            .asDrawable()
+            .load(activeAudio.artUri)
+            .placeholder(R.drawable.im_default)
+            .into(object: CustomTarget<Drawable>() {
+
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    drawable = resource
+                    notificationBuilder.setLargeIcon(drawable.toBitmap())
+                    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    notificationBuilder.setLargeIcon(drawable.toBitmap())
+                    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+                    super.onLoadFailed(errorDrawable)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+            })
+
     }
 
     fun removeNotification() {
