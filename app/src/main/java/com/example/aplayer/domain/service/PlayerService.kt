@@ -10,7 +10,6 @@ import android.media.MediaPlayer
 import android.media.session.MediaSessionManager
 import android.net.Uri
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import android.support.v4.media.MediaMetadataCompat
@@ -19,10 +18,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.*
 import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
-import com.example.aplayer.R
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.data.player.PlayerRepository
 import com.example.aplayer.domain.music.model.Music
@@ -35,9 +32,6 @@ const val ACTION_PAUSE = "com.example.aplayer.ACTION_PAUSE"
 const val ACTION_PREVIOUS = "com.example.aplayer.ACTION_PREVIOUS"
 const val ACTION_NEXT = "com.example.aplayer.ACTION_NEXT"
 const val ACTION_STOP = "com.example.aplayer.ACTION_STOP"
-const val MEDIA_CHANNEL_ID = "media_playback_channel"
-//AudioPlayer notification ID
-const val NOTIFICATION_ID = 101
 
 class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -60,6 +54,8 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     private var mediaSessionManager: MediaSessionManager? = null
     private lateinit var mediaSession: MediaSessionCompat
     private var transportControls: MediaControllerCompat.TransportControls? = null
+    //NotificationHelper
+    private val notificationHelper by lazy { NotificationHelper(this) }
 
     override fun onBind(intent: Intent?): IBinder = iBinder
 
@@ -78,9 +74,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createChannel()
-            }
+
             storageUtil.loadAudio()
             musicList = storageUtil.loadAudio()
             currentPosition = storageUtil.loadAudioIndex()
@@ -88,7 +82,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 //index is in a valid range
                 activeAudio = musicList[currentPosition]
             } else {
-                stopSelf();
+                stopSelf()
             }
         } catch (e: NullPointerException) {
             e.printStackTrace()
@@ -107,13 +101,13 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 e.printStackTrace()
                 stopSelf()
             }
-            buildNotification(PlaybackStatus.PLAYING)
         }
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent)
+        notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio ,mediaSession)
 
-        return super.onStartCommand(intent, flags, startId)
+        return START_NOT_STICKY
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -275,7 +269,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         override fun onReceive(context: Context, intent: Intent) {
             //pause audio on ACTION_AUDIO_BECOMING_NOISY
             pauseMusic()
-            buildNotification(PlaybackStatus.PAUSED)
+            notificationHelper.updateNotification(PlaybackStatus.PAUSED, activeAudio, mediaSession)
         }
     }
 
@@ -333,7 +327,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             mediaPlayer.reset()
             initMediaPlayer()
             updateMetaData()
-            buildNotification(PlaybackStatus.PLAYING)
+            notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
         }
     }
 
@@ -341,30 +335,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         //Register playNewAudio receiver
         val filter = IntentFilter(Broadcast_PLAY_NEW_AUDIO)
         registerReceiver(playNewAudio, filter)
-    }
-
-    private fun createChannel() {
-        // The id of the channel.
-        val id = MEDIA_CHANNEL_ID
-        // The user-visible name of the channel.
-        val name: CharSequence = "Media playback"
-        // The user-visible description of the channel.
-        val description = "Media playback controls"
-        val importance: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            NotificationManager.IMPORTANCE_HIGH
-        } else {
-            0
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mChannel = NotificationChannel(id, name, importance)
-            // Configure the notification channel.
-            mChannel.description = description
-            mChannel.setShowBadge(false)
-            mChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
-                mChannel
-            )
-        }
     }
 
     @Throws(RemoteException::class)
@@ -390,27 +360,27 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             override fun onPlay() {
                 super.onPlay()
                 resumeMusic()
-                buildNotification(PlaybackStatus.PLAYING)
+                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
             }
 
             override fun onPause() {
                 super.onPause()
                 pauseMusic()
-                buildNotification(PlaybackStatus.PAUSED)
+                notificationHelper.updateNotification(PlaybackStatus.PAUSED, activeAudio, mediaSession)
             }
 
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 skipToNext()
                 updateMetaData()
-                buildNotification(PlaybackStatus.PLAYING)
+                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
             }
 
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 skipToPrevious()
                 updateMetaData()
-                buildNotification(PlaybackStatus.PLAYING)
+                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
             }
 
             override fun onStop() {
@@ -478,86 +448,8 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         initMediaPlayer()
     }
 
-    private fun buildNotification(playbackStatus: PlaybackStatus) {
-        var notificationAction = R.drawable.baseline_pause_circle_filled //needs to be initialized
-        var playPauseAction: PendingIntent? = null
-
-        //Build a new notification according to the current state of the MediaPlayer
-        when (playbackStatus) {
-            PlaybackStatus.PLAYING -> {
-                notificationAction = R.drawable.baseline_pause_circle_filled
-                //create the pause action
-                playPauseAction = playbackAction(1)
-            }
-            PlaybackStatus.PAUSED -> {
-                notificationAction = R.drawable.baseline_play_circle_filled
-                //create the play action
-                playPauseAction = playbackAction(0)
-            }
-        }
-        // Create a new Notification
-        val notificationBuilder: NotificationCompat.Builder =
-            NotificationCompat.Builder(this, MEDIA_CHANNEL_ID)
-                .setShowWhen(false) // Set the Notification style
-                .setStyle(
-                    MediaStyle() // Attach our MediaSession token
-                        .setMediaSession(mediaSession.sessionToken) // Show our playback controls in the compact notification view.
-                        .setShowActionsInCompactView(0, 1, 2)
-                )
-                // Set the Notification color
-                .setColor(resources.getColor(R.color.black_lite_200))
-                // Set the large and small icons
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                // Set Notification content information
-                .setContentText(activeAudio.artist)
-                .setContentTitle(activeAudio.name)
-                // Add playback actions
-                .addAction(R.drawable.baseline_skip_previous, "previous", playbackAction(3))
-                .addAction(
-                    notificationAction, "pause", playPauseAction
-                )
-                .addAction(
-                    R.drawable.baseline_skip_next, "next", playbackAction(2)
-                )
-                .setSound(null)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(
-            NOTIFICATION_ID,
-            notificationBuilder.build()
-        )
-    }
-
     private fun removeNotification() {
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_ID)
-    }
-
-    private fun playbackAction(actionNumber: Int): PendingIntent? {
-        val playbackAction = Intent(this, PlayerService::class.java)
-        when (actionNumber) {
-            0 -> {
-                // Play
-                playbackAction.action = ACTION_PLAY
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
-            1 -> {
-                // Pause
-                playbackAction.action = ACTION_PAUSE
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
-            2 -> {
-                // Next track
-                playbackAction.action = ACTION_NEXT
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
-            3 -> {
-                // Previous track
-                playbackAction.action = ACTION_PREVIOUS
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
-        }
-        return null
+        notificationHelper.removeNotification()
     }
 
     private fun handleIncomingActions(playbackAction: Intent?) {
@@ -588,17 +480,12 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             stopMusic()
             mediaPlayer.release()
         }
-
-        removeAudioFocus()
-        removeNotification()
-
-        if (phoneStateListener != null) {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
-        }
-
         //unregister BroadcastReceivers
         unregisterReceiver(becomingNoisyReceiver)
         unregisterReceiver(playNewAudio)
+
+        removeAudioFocus()
+        removeNotification()
 
        storageUtil.clearCachedAudioPlaylist()
     }

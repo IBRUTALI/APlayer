@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.example.aplayer.data.music.ProviderRepository
+import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.utils.secondsToTime
 import io.reactivex.Single
@@ -17,6 +18,7 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
             try {
                 val listMusic = ArrayList<Music>()
                 val contentResolver = context.contentResolver
+                val storageUtil = StorageUtil(context)
                 val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val audioCursor =
                     contentResolver.query(uri, null, null, null, null).use { cursor ->
@@ -54,6 +56,7 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                             }
                         }
                     }
+                storageUtil.storeAudio(listMusic)
             } catch (e: IllegalStateException) {
                 subscriber.onError(e)
             }

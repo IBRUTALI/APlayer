@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplayer.R
 import com.example.aplayer.Repositories
+import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.adapter.MainAdapter
@@ -26,6 +27,7 @@ class MainFragment : Fragment() {
     private val adapter by lazy { MainAdapter() }
     private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
     private var indexState: Int = -1
+    private val storageUtil by lazy {  StorageUtil(requireContext()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -60,10 +62,8 @@ class MainFragment : Fragment() {
     private fun itemClickListener() {
         adapter.setOnClickListener(object : MainAdapter.OnClickListener {
             override fun onClick(position: Int, list: ArrayList<Music>) {
-                val bundle = Bundle()
-                bundle.putParcelableArrayList("music", list)
-                bundle.putInt("position", position)
-                findNavController().navigate(R.id.action_mainFragment_to_playerFragment, bundle)
+                storageUtil.storeAudioIndex(position)
+                findNavController().navigate(R.id.action_mainFragment_to_playerFragment)
             }
         })
     }

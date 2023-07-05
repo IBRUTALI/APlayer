@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.ActivityMainBinding
 import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.tabs.TabsFragment
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val topLevelDestinations = setOf(getTabsDestination(), getSignInDestination())
     private var player: PlayerService? = null
     private var isServiceBound = false
+    private val storageUtil by lazy { StorageUtil(this) }
 
     private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentViewCreated(
@@ -153,14 +155,15 @@ class MainActivity : AppCompatActivity() {
     private fun getSignInDestination(): Int = R.id.signInFragment
 
     override fun onDestroy() {
+        super.onDestroy()
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
-        super.onDestroy()
-        mBinding = null
         if (isServiceBound) {
             unbindService(serviceConnection)
             //service is active
             player?.stopSelf()
         }
+        mBinding = null
+        storageUtil.clearCachedAudioPlaylist()
     }
 }

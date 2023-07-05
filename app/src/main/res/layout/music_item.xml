@@ -8,8 +8,8 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/music_item_cardView"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginTop="2dp"
         app:cardCornerRadius="10dp"
         app:cardElevation="0dp"
@@ -22,12 +22,13 @@
 
         <ImageView
             android:id="@+id/music_item_image"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:src="@drawable/ic_launcher_background"
             android:contentDescription="@string/album_image"/>
 
         <ImageView
+            android:id="@+id/music_item_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -51,9 +52,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:maxLines="2"
-        android:text="Title"
+        android:text="@string/title"
         android:textColor="?attr/colorPrimaryVariant"
-        android:textSize="14dp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/music_item_cardView"
         app:layout_constraintStart_toStartOf="@+id/music_item_cardView"

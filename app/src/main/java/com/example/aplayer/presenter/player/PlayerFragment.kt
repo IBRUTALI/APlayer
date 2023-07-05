@@ -11,8 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
@@ -33,11 +31,12 @@ class PlayerFragment : Fragment() {
     private val playerViewModel by viewModels<PlayerViewModel>()
     private var player: PlayerService? = null
     private var isServiceBound by Delegates.notNull<Boolean>()
+    private val storageUtil by lazy {  StorageUtil(requireContext()) }
 
 
     private fun init() {
-        musicList = getMusicFromBundle()
-        position = getPositionFromBundle()
+        musicList = getMusicFromStorage()
+        position = getPositionFromStorage()
         isServiceBound = isMyServiceRunning(PlayerService::class.java)
     }
 
@@ -47,7 +46,6 @@ class PlayerFragment : Fragment() {
             val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
             player = binder.getService()
             isServiceBound = true
-            //Toast.makeText(this, "Service Bound", Toast.LENGTH_SHORT).show()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -83,18 +81,16 @@ class PlayerFragment : Fragment() {
     }
 
     private fun playAudio() {
-        val storage = StorageUtil(requireContext())
         //Check is service is active
-        if (!isServiceBound) { //TODO Bug: Music replayed when configuration changes
-            storage.storeAudio(musicList)
-            storage.storeAudioIndex(position)
+        if (!isServiceBound) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
+            playerViewModel.lastPosition.value = position
             activity?.startService(playerIntent)
             activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
-        } else {
+        } else if(position != playerViewModel.lastPosition.value){
             //Service is active
             //Send media with BroadcastReceiver
-            storage.storeAudioIndex(position)
+            playerViewModel.lastPosition.value = position
             val broadcastIntent = Intent(Broadcast_PLAY_NEW_AUDIO)
             activity?.sendBroadcast(broadcastIntent)
         }
@@ -135,12 +131,12 @@ class PlayerFragment : Fragment() {
         })
     }
 
-    private fun getMusicFromBundle(): ArrayList<Music> {
-        return arguments?.getParcelableArrayList("music")!!
+    private fun getMusicFromStorage(): ArrayList<Music> {
+        return storageUtil.loadAudio()
     }
 
-    private fun getPositionFromBundle(): Int {
-        return arguments?.getInt("position") as Int
+    private fun getPositionFromStorage(): Int {
+        return storageUtil.loadAudioIndex()
     }
 
     override fun onDestroy() {

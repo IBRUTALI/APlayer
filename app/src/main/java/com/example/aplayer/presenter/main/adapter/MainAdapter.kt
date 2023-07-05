@@ -6,17 +6,22 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.aplayer.R
+import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.MusicItemBinding
 import com.example.aplayer.domain.music.model.Music
+import kotlin.properties.Delegates
 
 class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
+    private var playingPosition by Delegates.notNull<Int>()
 
     class MainViewHolder(val binding: MusicItemBinding): ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
         val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val storageUtil = StorageUtil(parent.context)
+        playingPosition = storageUtil.loadAudioIndex()
         return MainViewHolder(binding)
     }
 
@@ -25,10 +30,12 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-
         with(holder.binding) {
             musicItemTitle.text = musicList[position].name
             musicItemDuration.text = musicList[position].duration
+            if(playingPosition == position) {
+                musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
+            } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
             Glide.with(holder.itemView.context)
                 .load(musicList[position].artUri)
                 .placeholder(R.drawable.im_default)

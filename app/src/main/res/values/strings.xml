@@ -11,4 +11,5 @@
     <string name="layout_style">Стиль списка</string>
     <string name="name">Name</string>
     <string name="artist">Artist</string>
+    <string name="title">Title</string>
 </resources>
