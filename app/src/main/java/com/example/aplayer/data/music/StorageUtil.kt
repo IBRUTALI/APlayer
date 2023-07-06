@@ -50,4 +50,16 @@ class StorageUtil(private val context: Context) {
         editor.apply()
     }
 
+    fun storeIsPlayingPosition(boolean: Boolean) {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putBoolean("Is playing position", boolean)
+        editor.apply()
+    }
+
+    fun isPlayingPosition(): Boolean {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE)
+        return preferences.getBoolean("Is playing position", false)
+    }
+
 }

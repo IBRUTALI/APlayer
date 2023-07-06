@@ -1,6 +1,9 @@
 package com.example.aplayer.presenter.main
 
+import android.content.ComponentName
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -16,6 +19,7 @@ import com.example.aplayer.Repositories
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.main.adapter.MainAdapter
 import com.example.aplayer.utils.viewModelCreator
 import io.reactivex.android.schedulers.AndroidSchedulers

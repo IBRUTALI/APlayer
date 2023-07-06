@@ -119,6 +119,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     override fun playMusic() {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
+            storageUtil.storeIsPlayingPosition(true)
         }
     }
 
@@ -126,6 +127,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         if (_mediaPlayer == null) return
         if (mediaPlayer.isPlaying) {
             mediaPlayer.stop()
+            storageUtil.storeIsPlayingPosition(false)
         }
     }
 

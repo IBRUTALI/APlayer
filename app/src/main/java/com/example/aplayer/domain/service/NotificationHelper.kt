@@ -80,7 +80,7 @@ class NotificationHelper(private val context: Context) {
                     .setShowActionsInCompactView(0, 1, 2)
             )
             .setColor(context.getColor(R.color.black_lite_200))
-            .setSmallIcon(R.drawable.baseline_play_circle_filled)
+            .setSmallIcon(R.drawable.ic_app_logo)
             .addAction(R.drawable.baseline_skip_previous, "previous", playbackAction(3))
             .addAction(notificationAction, "pause", playPauseAction)
             .addAction(R.drawable.baseline_skip_next, "next", playbackAction(2))

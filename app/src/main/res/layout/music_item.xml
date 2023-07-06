@@ -24,7 +24,7 @@
             android:id="@+id/music_item_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher_background"
+            android:src="@drawable/im_default"
             android:contentDescription="@string/album_image"/>
 
         <ImageView
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:text="@string/duration"
-            android:textColor="?attr/colorPrimaryVariant"
+            android:textColor="@color/white"
             android:textSize="14sp"/>
 
     </androidx.cardview.widget.CardView>

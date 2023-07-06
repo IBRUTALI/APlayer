@@ -11,10 +11,11 @@ import com.example.aplayer.databinding.MusicItemBinding
 import com.example.aplayer.domain.music.model.Music
 import kotlin.properties.Delegates
 
-class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
+class MainAdapter(): RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
-    private var playingPosition by Delegates.notNull<Int>()
+    private var playingPosition = -1
+    private var isPlayingPosition = false
 
     class MainViewHolder(val binding: MusicItemBinding): ViewHolder(binding.root)
 
@@ -22,6 +23,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         val storageUtil = StorageUtil(parent.context)
         playingPosition = storageUtil.loadAudioIndex()
+        isPlayingPosition = storageUtil.isPlayingPosition()
         return MainViewHolder(binding)
     }
 
@@ -33,7 +35,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         with(holder.binding) {
             musicItemTitle.text = musicList[position].name
             musicItemDuration.text = musicList[position].duration
-            if(playingPosition == position) {
+            if(playingPosition == position && isPlayingPosition) {
                 musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
             } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
             Glide.with(holder.itemView.context)
