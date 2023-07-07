@@ -28,10 +28,12 @@ class PlayerFragment : Fragment() {
     private val binding get() = mBinding!!
     private lateinit var musicList: ArrayList<Music>
     private var position = -1
-    private val playerViewModel by viewModels<PlayerViewModel>()
+    private val playerViewModel by viewModels<PlayerViewModel>(
+        ownerProducer = { requireActivity() }
+    )
     private var player: PlayerService? = null
     private var isServiceBound by Delegates.notNull<Boolean>()
-    private val storageUtil by lazy {  StorageUtil(requireContext()) }
+    private val storageUtil by lazy { StorageUtil(requireContext()) }
 
 
     private fun init() {
@@ -87,7 +89,7 @@ class PlayerFragment : Fragment() {
             playerViewModel.lastPosition.value = position
             activity?.startService(playerIntent)
             activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
-        } else if(position != playerViewModel.lastPosition.value){
+        } else if (position != playerViewModel.lastPosition.value) {
             //Service is active
             //Send media with BroadcastReceiver
             playerViewModel.lastPosition.value = position

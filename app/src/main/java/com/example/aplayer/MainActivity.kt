@@ -1,11 +1,14 @@
 package com.example.aplayer
 
+import android.app.Service
 import android.content.ComponentName
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -15,11 +18,13 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.ActivityMainBinding
+import com.example.aplayer.domain.service.NotificationHelper
 import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.tabs.TabsFragment
 import java.util.regex.Pattern
 
 const val Broadcast_PLAY_NEW_AUDIO = "com.example.aplayer.PlayNewAudio"
+
 class MainActivity : AppCompatActivity() {
 
     private var mBinding: ActivityMainBinding? = null
@@ -65,16 +70,7 @@ class MainActivity : AppCompatActivity() {
         val navController = getRootNavController()
         prepareRootNavController(true, navController)
         onNavControllerActivated(navController)
-
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
-    }
-
-    override fun onBackPressed() {
-        if (isStartDestination(navController?.currentDestination)) {
-            super.onBackPressed()
-        } else {
-            navController?.popBackStack()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean =
@@ -137,16 +133,24 @@ class MainActivity : AppCompatActivity() {
         return title.toString()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return false
-    }
-
     private fun isSignedIn(): Boolean {
 //        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
 //        val args = MainActivityArgs.fromBundle(bundle)
 //        return args.isSignedIn
         return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return false
+    }
+
+    override fun onBackPressed() {
+        if (isStartDestination(navController?.currentDestination)) {
+            moveTaskToBack(true)
+        } else {
+            navController?.popBackStack()
+        }
     }
 
     private fun getMainNavigationGraphId(): Int = R.navigation.main_graph
@@ -162,7 +166,7 @@ class MainActivity : AppCompatActivity() {
         if (isServiceBound) {
             unbindService(serviceConnection)
             //service is active
-            player?.stopSelf()
+            player?.stopForeground(true)
         }
         mBinding = null
         storageUtil.storeIsPlayingPosition(false)

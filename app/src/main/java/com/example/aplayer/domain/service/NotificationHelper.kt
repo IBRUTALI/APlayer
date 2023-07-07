@@ -6,12 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
@@ -87,7 +83,7 @@ class NotificationHelper(private val context: Context) {
             .setOngoing(isPlaying)
             .setSound(null)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
+            .setAutoCancel(false)
     }
 
     fun updateNotification(
@@ -164,11 +160,10 @@ class NotificationHelper(private val context: Context) {
     }
 
     private fun createContentIntent(): PendingIntent {
-        return NavDeepLinkBuilder(context)
-            .setComponentName(MainActivity::class.java)
-            .setGraph(R.navigation.tabs_graph)
-            .setDestination(R.id.playerFragment)
-            .createPendingIntent()
+        val resultIntent = Intent(context, MainActivity::class.java)
+        resultIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        return PendingIntent.getActivity(context, 0, resultIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     companion object {
