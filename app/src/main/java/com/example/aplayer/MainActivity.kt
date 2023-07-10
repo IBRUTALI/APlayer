@@ -1,14 +1,11 @@
 package com.example.aplayer
 
-import android.app.Service
 import android.content.ComponentName
-import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -18,7 +15,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.ActivityMainBinding
-import com.example.aplayer.domain.service.NotificationHelper
 import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.tabs.TabsFragment
 import java.util.regex.Pattern
@@ -145,6 +141,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (isStartDestination(navController?.currentDestination)) {
             moveTaskToBack(true)

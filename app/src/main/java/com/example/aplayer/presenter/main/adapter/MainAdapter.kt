@@ -2,6 +2,7 @@ package com.example.aplayer.presenter.main.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -9,9 +10,10 @@ import com.example.aplayer.R
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.MusicItemBinding
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.utils.MainDiffUtil
 import kotlin.properties.Delegates
 
-class MainAdapter(): RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
+class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
     private var playingPosition = -1
@@ -62,8 +64,9 @@ class MainAdapter(): RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         fun onClick(position: Int, list: ArrayList<Music>)
     }
 
-    fun setList(list: List<Music>) {
-        musicList = list
+    fun setList(newList: List<Music>) {
+        musicList = newList
         notifyDataSetChanged()
     }
+
 }

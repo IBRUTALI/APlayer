@@ -18,11 +18,13 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.app.NotificationCompat.*
 import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.data.player.PlayerRepository
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.presenter.main.Broadcast_PLAYING_POSITION
 import com.example.aplayer.utils.PlaybackStatus
 import java.io.IOException
 
@@ -119,7 +121,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     override fun playMusic() {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
-            storageUtil.storeIsPlayingPosition(true)
         }
     }
 
@@ -363,12 +364,14 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 super.onPlay()
                 resumeMusic()
                 notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                sendBroadcast()
             }
 
             override fun onPause() {
                 super.onPause()
                 pauseMusic()
                 notificationHelper.updateNotification(PlaybackStatus.PAUSED, activeAudio, mediaSession)
+                sendBroadcast()
             }
 
             override fun onSkipToNext() {
@@ -376,6 +379,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 skipToNext()
                 updateMetaData()
                 notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                sendBroadcast()
             }
 
             override fun onSkipToPrevious() {
@@ -383,6 +387,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 skipToPrevious()
                 updateMetaData()
                 notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                sendBroadcast()
             }
 
             override fun onStop() {
@@ -468,6 +473,11 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         } else if (actionString.equals(ACTION_STOP, ignoreCase = true)) {
             transportControls?.stop()
         }
+    }
+
+    private fun sendBroadcast() {
+        val broadcastIntent = Intent(Broadcast_PLAYING_POSITION)
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent)
     }
 
     inner class LocalBinder : Binder() {

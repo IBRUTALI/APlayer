@@ -33,6 +33,8 @@ class NotificationHelper(private val context: Context) {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
+    private val contentIntent by lazy { createContentIntent() }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() =
         NotificationChannel(
@@ -95,8 +97,6 @@ class NotificationHelper(private val context: Context) {
             notificationManager.createNotificationChannel(createChannel())
         }
 
-        val contentIntent = createContentIntent()
-
         val notificationBuilder = buildNotification(playbackStatus, mediaSession)
             .setContentText(activeAudio.artist)
             .setContentTitle(activeAudio.name)
@@ -126,10 +126,6 @@ class NotificationHelper(private val context: Context) {
 
             })
 
-    }
-
-    fun removeNotification() {
-        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
@@ -164,6 +160,10 @@ class NotificationHelper(private val context: Context) {
         resultIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         return PendingIntent.getActivity(context, 0, resultIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    fun removeNotification() {
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     companion object {

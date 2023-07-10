@@ -1,9 +1,10 @@
 package com.example.aplayer.presenter.main
 
-import android.content.ComponentName
-import android.content.ServiceConnection
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -11,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,19 +21,31 @@ import com.example.aplayer.Repositories
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.main.adapter.MainAdapter
 import com.example.aplayer.utils.viewModelCreator
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
+const val Broadcast_PLAYING_POSITION = "play_pause"
+
 class MainFragment : Fragment() {
     private var mBinding: FragmentMainBinding? = null
     private val binding get() = mBinding!!
     private val adapter by lazy { MainAdapter() }
-    private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
     private var indexState: Int = -1
-    private val storageUtil by lazy {  StorageUtil(requireContext()) }
+    private val storageUtil by lazy { StorageUtil(requireContext()) }
+    private val viewModel by viewModelCreator {
+        MainViewModel(
+            requireActivity().application,
+            Repositories.providerRepository
+        )
+    }
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val position = storageUtil.loadAudioIndex()
+            viewModel.setPlayingPosition(position)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,6 +53,7 @@ class MainFragment : Fragment() {
         binding.mainRecyclerView.adapter = adapter
         getMusic()
         itemClickListener()
+        playingPositionObserver()
     }
 
     override fun onCreateView(
@@ -70,6 +85,12 @@ class MainFragment : Fragment() {
                 findNavController().navigate(R.id.action_mainFragment_to_playerFragment)
             }
         })
+    }
+
+    private fun playingPositionObserver() {
+        viewModel.playingPosition.observe(viewLifecycleOwner) {
+            adapter.setList(storageUtil.loadAudio())
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -118,6 +139,17 @@ class MainFragment : Fragment() {
             }
         dialog.create()
         dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
     }
 
     override fun onDestroy() {
