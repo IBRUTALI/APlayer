@@ -19,9 +19,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aplayer.R
 import com.example.aplayer.Repositories
 import com.example.aplayer.data.music.StorageUtil
+import com.example.aplayer.data.settings.SettingsStorage
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.presenter.main.adapter.AdapterState
 import com.example.aplayer.presenter.main.adapter.MainAdapter
+import com.example.aplayer.presenter.main.adapter.toAdapterState
 import com.example.aplayer.utils.viewModelCreator
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -31,10 +34,12 @@ const val Broadcast_PLAYING_POSITION = "play_pause"
 class MainFragment : Fragment() {
     private var mBinding: FragmentMainBinding? = null
     private val binding get() = mBinding!!
-    private val adapter by lazy { MainAdapter() }
+    private lateinit var adapter: MainAdapter
     private var indexState: Int = -1
     private val storageUtil by lazy { StorageUtil(requireContext()) }
+    private val settingsUtil by lazy { SettingsStorage(requireContext()) }
     private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
+    private var musicList: List<Music> = emptyList()
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -45,8 +50,10 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.mainRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-        binding.mainRecyclerView.adapter = adapter
+        val state = settingsUtil.loadListStyle()
+        indexState = state
+        adapter = MainAdapter(state.toAdapterState())
+        switchAdapterLayouts(state)
         getMusic()
         itemClickListener()
         playingPositionObserver()
@@ -67,6 +74,7 @@ class MainFragment : Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ list ->
+                musicList = list
                 adapter.setList(list)
             }, { th ->
                 Log.e("!@#", th.message.toString())
@@ -112,18 +120,7 @@ class MainFragment : Fragment() {
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.choose_list_style))
             .setPositiveButton(getString(R.string.ok)) { _, _ ->
-                when (indexState) {
-                    0 -> {
-                        binding.mainRecyclerView.layoutManager =
-                            LinearLayoutManager(requireContext())
-                        binding.mainRecyclerView.adapter = adapter
-                    }
-                    1 -> {
-                        binding.mainRecyclerView.layoutManager =
-                            GridLayoutManager(requireContext(), 3)
-                        binding.mainRecyclerView.adapter = adapter
-                    }
-                }
+                switchAdapterLayouts(indexState)
             }
             .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
             .setSingleChoiceItems(choiceList, indexState) { _, index ->
@@ -139,6 +136,27 @@ class MainFragment : Fragment() {
             }
         dialog.create()
         dialog.show()
+    }
+
+    private fun switchAdapterLayouts(state: Int) {
+        when (state) {
+            0 -> {
+                adapter = MainAdapter(AdapterState.LINEAR)
+                binding.mainRecyclerView.layoutManager =
+                    LinearLayoutManager(requireContext())
+                binding.mainRecyclerView.adapter = adapter
+                adapter.setList(musicList)
+                settingsUtil.storeListStyle(AdapterState.LINEAR)
+            }
+            1 -> {
+                adapter = MainAdapter(AdapterState.GRID)
+                binding.mainRecyclerView.layoutManager =
+                    GridLayoutManager(requireContext(), 3)
+                binding.mainRecyclerView.adapter = adapter
+                adapter.setList(musicList)
+                settingsUtil.storeListStyle(AdapterState.GRID)
+            }
+        }
     }
 
     override fun onResume() {

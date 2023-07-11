@@ -9,43 +9,78 @@ import com.bumptech.glide.Glide
 import com.example.aplayer.R
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.MusicItemBinding
+import com.example.aplayer.databinding.MusicItemGridBinding
 import com.example.aplayer.domain.music.model.Music
+import com.example.aplayer.presenter.main.adapter.AdapterState.*
 import com.example.aplayer.utils.MainDiffUtil
 import kotlin.properties.Delegates
 
-class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
+class MainAdapter(
+   private val state: AdapterState
+) : RecyclerView.Adapter<ViewHolder>() {
     private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
     private var playingPosition = -1
     private var isPlayingPosition = false
 
-    class MainViewHolder(val binding: MusicItemBinding): ViewHolder(binding.root)
+    class MainViewHolder(val binding1: MusicItemBinding) : ViewHolder(binding1.root)
+    class MainGridViewHolder(val binding2: MusicItemGridBinding) : ViewHolder(binding2.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainViewHolder {
-        val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val storageUtil = StorageUtil(parent.context)
         playingPosition = storageUtil.loadAudioIndex()
         isPlayingPosition = storageUtil.isPlayingPosition()
-        return MainViewHolder(binding)
+        return when (state) {
+            LINEAR -> {
+                val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                MainViewHolder(binding)
+            }
+            else -> {
+                val binding = MusicItemGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                MainGridViewHolder(binding)
+            }
+        }
     }
 
     override fun getItemCount(): Int {
         return musicList.size
     }
 
-    override fun onBindViewHolder(holder: MainViewHolder, position: Int) {
-        with(holder.binding) {
-            musicItemTitle.text = musicList[position].name
-            musicItemDuration.text = musicList[position].duration
-            if(playingPosition == position && isPlayingPosition) {
-                musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
-            } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
-            Glide.with(holder.itemView.context)
-                .load(musicList[position].artUri)
-                .placeholder(R.drawable.im_default)
-                .error(R.drawable.im_default)
-                .centerCrop()
-                .into(musicItemImage)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        when(state) {
+            LINEAR -> {
+                val viewHolder = holder as MainViewHolder
+                with(viewHolder.binding1) {
+                    musicItemTitle.text = musicList[position].name
+                    musicItemDuration.text = musicList[position].duration
+                    if (playingPosition == position && isPlayingPosition) {
+                        musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
+                    } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
+                    Glide.with(holder.itemView.context)
+                        .load(musicList[position].artUri)
+                        .placeholder(R.drawable.im_default)
+                        .error(R.drawable.im_default)
+                        .centerCrop()
+                        .into(musicItemImage)
+                }
+            }
+
+            GRID -> {
+                val viewHolder = holder as MainGridViewHolder
+                with(viewHolder.binding2) {
+                    musicItemTitle.text = musicList[position].name
+                    musicItemDuration.text = musicList[position].duration
+                    if (playingPosition == position && isPlayingPosition) {
+                        musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
+                    } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
+                    Glide.with(holder.itemView.context)
+                        .load(musicList[position].artUri)
+                        .placeholder(R.drawable.im_default)
+                        .error(R.drawable.im_default)
+                        .centerCrop()
+                        .into(musicItemImage)
+                }
+            }
         }
 
         holder.itemView.setOnClickListener {
@@ -64,6 +99,10 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         fun onClick(position: Int, list: ArrayList<Music>)
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return position % 2 * 2
+    }
+
     fun setList(newList: List<Music>) {
         val diffUtil = MainDiffUtil(musicList, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
@@ -75,18 +114,18 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
         playingPosition = position
         isPlayingPosition = isPlaying
         notifyItemChanged(position)
-        when(position) {
+        when (position) {
             0 -> {
-                notifyItemChanged(musicList.size-1, Object())
-                notifyItemChanged(position+1, Object())
+                notifyItemChanged(musicList.size - 1, Object())
+                notifyItemChanged(position + 1, Object())
             }
-            musicList.size-1-> {
-                notifyItemChanged(position-1, Object())
+            musicList.size - 1 -> {
+                notifyItemChanged(position - 1, Object())
                 notifyItemChanged(0, Object())
             }
             else -> {
-                notifyItemChanged(position-1, Object())
-                notifyItemChanged(position+1, Object())
+                notifyItemChanged(position - 1, Object())
+                notifyItemChanged(position + 1, Object())
             }
         }
 
