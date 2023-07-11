@@ -48,14 +48,17 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     private val iBinder = LocalBinder()
     private lateinit var audioManager: AudioManager
     private val storageUtil = StorageUtil(this)
+
     //Call
     private var ongoingCall = false
     private var phoneStateListener: PhoneStateListener? = null
     private lateinit var telephonyManager: TelephonyManager
+
     //MediaSession
     private var mediaSessionManager: MediaSessionManager? = null
     private lateinit var mediaSession: MediaSessionCompat
     private var transportControls: MediaControllerCompat.TransportControls? = null
+
     //NotificationHelper
     private val notificationHelper by lazy { NotificationHelper(this) }
 
@@ -107,7 +110,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent)
-        notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio ,mediaSession)
+        notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
 
         return START_NOT_STICKY
     }
@@ -121,6 +124,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     override fun playMusic() {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
+            storageUtil.storeIsPlayingPosition(true)
         }
     }
 
@@ -136,6 +140,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             resumePosition = mediaPlayer.currentPosition
+            storageUtil.storeIsPlayingPosition(false)
         }
     }
 
@@ -143,6 +148,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.seekTo(resumePosition)
             mediaPlayer.start()
+            storageUtil.storeIsPlayingPosition(true)
         }
     }
 
@@ -173,6 +179,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
         try {
             activeAudio.uri?.let { mediaPlayer.setDataSource(this, Uri.parse(it)) }
+            storageUtil.storeIsPlayingPosition(true)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -181,10 +188,10 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
-        stopMusic()
-        removeNotification()
+        skipToNext()
+        // removeNotification()
         //stop the service
-        stopSelf()
+        //stopSelf()
     }
 
     override fun onPrepared(mp: MediaPlayer?) {
@@ -363,14 +370,22 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             override fun onPlay() {
                 super.onPlay()
                 resumeMusic()
-                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                notificationHelper.updateNotification(
+                    PlaybackStatus.PLAYING,
+                    activeAudio,
+                    mediaSession
+                )
                 sendBroadcast()
             }
 
             override fun onPause() {
                 super.onPause()
                 pauseMusic()
-                notificationHelper.updateNotification(PlaybackStatus.PAUSED, activeAudio, mediaSession)
+                notificationHelper.updateNotification(
+                    PlaybackStatus.PAUSED,
+                    activeAudio,
+                    mediaSession
+                )
                 sendBroadcast()
             }
 
@@ -378,7 +393,11 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 super.onSkipToNext()
                 skipToNext()
                 updateMetaData()
-                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                notificationHelper.updateNotification(
+                    PlaybackStatus.PLAYING,
+                    activeAudio,
+                    mediaSession
+                )
                 sendBroadcast()
             }
 
@@ -386,7 +405,11 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
                 super.onSkipToPrevious()
                 skipToPrevious()
                 updateMetaData()
-                notificationHelper.updateNotification(PlaybackStatus.PLAYING, activeAudio, mediaSession)
+                notificationHelper.updateNotification(
+                    PlaybackStatus.PLAYING,
+                    activeAudio,
+                    mediaSession
+                )
                 sendBroadcast()
             }
 
@@ -499,7 +522,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         removeAudioFocus()
         removeNotification()
 
-       storageUtil.clearCachedAudioPlaylist()
+        storageUtil.clearCachedAudioPlaylist()
     }
 
 }

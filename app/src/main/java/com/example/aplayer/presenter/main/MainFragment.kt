@@ -34,12 +34,8 @@ class MainFragment : Fragment() {
     private val adapter by lazy { MainAdapter() }
     private var indexState: Int = -1
     private val storageUtil by lazy { StorageUtil(requireContext()) }
-    private val viewModel by viewModelCreator {
-        MainViewModel(
-            requireActivity().application,
-            Repositories.providerRepository
-        )
-    }
+    private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
+
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val position = storageUtil.loadAudioIndex()
@@ -89,10 +85,14 @@ class MainFragment : Fragment() {
 
     private fun playingPositionObserver() {
         viewModel.playingPosition.observe(viewLifecycleOwner) {
-            adapter.setList(storageUtil.loadAudio())
+            adapter.updateList(
+                storageUtil.loadAudioIndex(),
+                storageUtil.isPlayingPosition()
+            )
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.layout_style -> {

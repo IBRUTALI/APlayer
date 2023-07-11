@@ -50,7 +50,7 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
 
         holder.itemView.setOnClickListener {
             if (onClickListener != null) {
-                onClickListener!!.onClick(position, musicList as ArrayList<Music>)
+                onClickListener?.onClick(position, musicList as ArrayList<Music>)
             }
         }
 
@@ -65,8 +65,31 @@ class MainAdapter: RecyclerView.Adapter<MainAdapter.MainViewHolder>() {
     }
 
     fun setList(newList: List<Music>) {
+        val diffUtil = MainDiffUtil(musicList, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        diffResult.dispatchUpdatesTo(this)
         musicList = newList
-        notifyDataSetChanged()
+    }
+
+    fun updateList(position: Int, isPlaying: Boolean) {
+        playingPosition = position
+        isPlayingPosition = isPlaying
+        notifyItemChanged(position)
+        when(position) {
+            0 -> {
+                notifyItemChanged(musicList.size-1, Object())
+                notifyItemChanged(position+1, Object())
+            }
+            musicList.size-1-> {
+                notifyItemChanged(position-1, Object())
+                notifyItemChanged(0, Object())
+            }
+            else -> {
+                notifyItemChanged(position-1, Object())
+                notifyItemChanged(position+1, Object())
+            }
+        }
+
     }
 
 }

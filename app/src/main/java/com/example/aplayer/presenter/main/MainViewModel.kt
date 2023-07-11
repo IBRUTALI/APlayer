@@ -11,10 +11,8 @@ import com.example.aplayer.domain.music.model.Music
 import io.reactivex.Single
 
 class MainViewModel(
-    application: Application,
     private val providerRepository: ProviderRepository
-) : AndroidViewModel(application) {
-    private val storageUtil = StorageUtil(application.applicationContext)
+) : ViewModel() {
     private val _playingPosition = MutableLiveData(-1)
     val playingPosition = _playingPosition
 
