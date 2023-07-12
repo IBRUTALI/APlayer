@@ -55,7 +55,6 @@ class MainFragment : Fragment() {
         adapter = MainAdapter(state.toAdapterState())
         switchAdapterLayouts(state)
         getMusic()
-        itemClickListener()
         playingPositionObserver()
     }
 
@@ -147,6 +146,7 @@ class MainFragment : Fragment() {
                 binding.mainRecyclerView.adapter = adapter
                 adapter.setList(musicList)
                 settingsUtil.storeListStyle(AdapterState.LINEAR)
+                itemClickListener()
             }
             1 -> {
                 adapter = MainAdapter(AdapterState.GRID)
@@ -155,6 +155,7 @@ class MainFragment : Fragment() {
                 binding.mainRecyclerView.adapter = adapter
                 adapter.setList(musicList)
                 settingsUtil.storeListStyle(AdapterState.GRID)
+                itemClickListener()
             }
         }
     }

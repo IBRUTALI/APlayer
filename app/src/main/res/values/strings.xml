@@ -17,4 +17,5 @@
     <string name="cancel">Отмена</string>
     <string name="list">Список</string>
     <string name="tile">Плитка</string>
+    <string name="favorite">Избранное</string>
 </resources>

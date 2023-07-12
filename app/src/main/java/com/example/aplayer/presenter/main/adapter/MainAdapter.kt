@@ -23,8 +23,8 @@ class MainAdapter(
     private var playingPosition = -1
     private var isPlayingPosition = false
 
-    class MainViewHolder(val binding1: MusicItemBinding) : ViewHolder(binding1.root)
-    class MainGridViewHolder(val binding2: MusicItemGridBinding) : ViewHolder(binding2.root)
+    class MainViewHolder(val binding: MusicItemBinding) : ViewHolder(binding.root)
+    class MainGridViewHolder(val binding: MusicItemGridBinding) : ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val storageUtil = StorageUtil(parent.context)
@@ -35,7 +35,7 @@ class MainAdapter(
                 val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 MainViewHolder(binding)
             }
-            else -> {
+            GRID -> {
                 val binding = MusicItemGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 MainGridViewHolder(binding)
             }
@@ -50,7 +50,7 @@ class MainAdapter(
         when(state) {
             LINEAR -> {
                 val viewHolder = holder as MainViewHolder
-                with(viewHolder.binding1) {
+                with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
                     musicItemDuration.text = musicList[position].duration
                     if (playingPosition == position && isPlayingPosition) {
@@ -67,7 +67,7 @@ class MainAdapter(
 
             GRID -> {
                 val viewHolder = holder as MainGridViewHolder
-                with(viewHolder.binding2) {
+                with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
                     musicItemDuration.text = musicList[position].duration
                     if (playingPosition == position && isPlayingPosition) {

@@ -1,4 +1,4 @@
-package com.example.aplayer.presenter.profile
+package com.example.aplayer.presenter.favorite
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -8,24 +8,24 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.aplayer.R
 
-class ProfileFragment : Fragment() {
+class FavoriteFragment : Fragment() {
 
     companion object {
-        fun newInstance() = ProfileFragment()
+        fun newInstance() = FavoriteFragment()
     }
 
-    private lateinit var viewModel: ProfileViewModel
+    private lateinit var viewModel: FavoriteViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        return inflater.inflate(R.layout.fragment_favorite, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(FavoriteViewModel::class.java)
         // TODO: Use the ViewModel
     }
 

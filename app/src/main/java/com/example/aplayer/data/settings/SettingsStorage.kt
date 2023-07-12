@@ -13,13 +13,17 @@ class SettingsStorage(private val context: Context) {
     fun storeListStyle(state: AdapterState) {
         preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
         val editor = preferences.edit()
-        editor.putInt("Style state", state.ordinal)
+        editor.putInt(STYLE_STATE, state.ordinal)
         editor.apply()
     }
 
     fun loadListStyle(): Int {
         preferences = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
-        return preferences.getInt("Style state", 0)
+        return preferences.getInt(STYLE_STATE, 0)
+    }
+
+    companion object {
+        const val STYLE_STATE = "Style state"
     }
 
 }

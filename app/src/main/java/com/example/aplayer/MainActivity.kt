@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     private var mBinding: ActivityMainBinding? = null
     private val binding get() = mBinding!!
     private var navController: NavController? = null
-    private val topLevelDestinations = setOf(getTabsDestination(), getSignInDestination())
+    private val topLevelDestinations = setOf(getTabsDestination())
     private var player: PlayerService? = null
     private var isServiceBound = false
     private val storageUtil by lazy { StorageUtil(this) }
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar.mainToolbar)
         val navController = getRootNavController()
-        prepareRootNavController(true, navController)
+        prepareRootNavController(navController)
         onNavControllerActivated(navController)
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
     }
@@ -72,14 +72,10 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean =
         (navController?.navigateUp() ?: false) || super.onSupportNavigateUp()
 
-    private fun prepareRootNavController(isSignedIn: Boolean, navController: NavController) {
+    private fun prepareRootNavController(navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
         graph.setStartDestination(
-            if (isSignedIn) {
                 getTabsDestination()
-            } else {
-                getSignInDestination()
-            }
         )
         navController.graph = graph
     }
@@ -109,6 +105,7 @@ class MainActivity : AppCompatActivity() {
         return startDestinations.contains(destination.id)
     }
 
+    //Custom title for navigation app bar
     private fun prepareTitle(label: CharSequence?, arguments: Bundle?): String {
         if (label == null) return ""
         val title = StringBuffer()
@@ -129,13 +126,6 @@ class MainActivity : AppCompatActivity() {
         return title.toString()
     }
 
-    private fun isSignedIn(): Boolean {
-//        val bundle = intent.extras ?: throw IllegalStateException("No required arguments")
-//        val args = MainActivityArgs.fromBundle(bundle)
-//        return args.isSignedIn
-        return true
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return false
@@ -153,8 +143,6 @@ class MainActivity : AppCompatActivity() {
     private fun getMainNavigationGraphId(): Int = R.navigation.main_graph
 
     private fun getTabsDestination(): Int = R.id.tabsFragment
-
-    private fun getSignInDestination(): Int = R.id.signInFragment
 
     override fun onDestroy() {
         super.onDestroy()
