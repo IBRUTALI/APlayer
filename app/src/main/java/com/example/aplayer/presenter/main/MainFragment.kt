@@ -64,6 +64,8 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentMainBinding.inflate(layoutInflater, container, false)
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
         setHasOptionsMenu(true)
         return binding.root
     }
@@ -160,19 +162,9 @@ class MainFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        LocalBroadcastManager.getInstance(requireContext())
-            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
-    }
-
-    override fun onPause() {
-        super.onPause()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
         mBinding = null
     }
 }

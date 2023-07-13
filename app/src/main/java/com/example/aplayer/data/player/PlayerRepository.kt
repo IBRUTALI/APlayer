@@ -20,8 +20,6 @@ interface PlayerRepository {
 
     fun skipToPrevious()
 
-    fun isPlaying(): Boolean
-
     fun initMediaPlayer()
 
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -30,18 +29,25 @@
         android:id="@+id/player_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="@string/name"
         android:textAlignment="center"
-        android:maxLines="1"
-        android:textStyle="bold"
         android:textColor="?attr/colorPrimaryVariant"
         android:textSize="20sp"
-        android:text="@string/name"
+        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/player_like"
         app:layout_constraintStart_toEndOf="@+id/player_dislike"
-        app:layout_constraintTop_toBottomOf="@+id/player_card_view" />
+        app:layout_constraintTop_toBottomOf="@+id/player_card_view">
+        <requestFocus />
+    </TextView>
 
     <TextView
         android:id="@+id/player_artist"
@@ -60,29 +66,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_dislike"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/player_name" />
+        app:layout_constraintTop_toTopOf="@+id/player_name"
+        app:tint="?attr/colorPrimary" />
 
     <ImageView
         android:id="@+id/player_like"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/outline_like"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/player_name" />
+        app:layout_constraintTop_toTopOf="@+id/player_name"
+        app:tint="?attr/colorPrimary" />
 
     <SeekBar
         android:id="@+id/player_seek_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:progressBackgroundTint="?attr/colorPrimaryVariant"
+        android:progressTint="?attr/colorPrimary"
         android:scaleX="1.12"
         android:scaleY="1.12"
         android:thumbTint="?attr/colorPrimary"
-        android:progressBackgroundTint="?attr/colorPrimaryVariant"
-        android:progressTint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toBottomOf="@+id/player_artist" />
@@ -124,10 +130,10 @@
         android:layout_height="30dp"
         android:layout_marginStart="35dp"
         android:src="@drawable/baseline_skip_previous"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
         app:layout_constraintStart_toEndOf="@+id/player_shuffle"
-        app:layout_constraintTop_toTopOf="@+id/player_play" />
+        app:layout_constraintTop_toTopOf="@+id/player_play"
+        app:tint="?attr/colorPrimary" />
 
     <ImageView
         android:id="@+id/player_next"
@@ -135,29 +141,29 @@
         android:layout_height="30dp"
         android:layout_marginEnd="35dp"
         android:src="@drawable/baseline_skip_next"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
         app:layout_constraintEnd_toStartOf="@+id/player_repeat"
-        app:layout_constraintTop_toTopOf="@+id/player_play" />
+        app:layout_constraintTop_toTopOf="@+id/player_play"
+        app:tint="?attr/colorPrimary" />
 
     <ImageView
         android:id="@+id/player_repeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_repeat"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_next"
         app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
-        app:layout_constraintTop_toTopOf="@+id/player_next" />
+        app:layout_constraintTop_toTopOf="@+id/player_next"
+        app:tint="?attr/colorPrimary" />
 
     <ImageView
         android:id="@+id/player_shuffle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_shuffle"
-        app:tint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/player_previous"
         app:layout_constraintStart_toStartOf="@+id/player_seek_bar"
-        app:layout_constraintTop_toTopOf="@+id/player_previous" />
+        app:layout_constraintTop_toTopOf="@+id/player_previous"
+        app:tint="?attr/colorPrimary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,10 +1,7 @@
 package com.example.aplayer.presenter.player
 
 import android.app.ActivityManager
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.view.LayoutInflater
@@ -13,15 +10,19 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
 import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
 import com.example.aplayer.R
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.domain.service.PlayerService
+import com.example.aplayer.domain.service.*
+import com.example.aplayer.presenter.main.Broadcast_PLAYING_POSITION
 import kotlin.properties.Delegates
 
+const val Broadcast_AUDIO_ACTION = "Broadcast_AUDIO_ACTION"
+const val AUDIO_ACTION = "audio_action"
 
 class PlayerFragment : Fragment() {
     private var mBinding: FragmentPlayerBinding? = null
@@ -40,6 +41,12 @@ class PlayerFragment : Fragment() {
         musicList = getMusicFromStorage()
         position = getPositionFromStorage()
         isServiceBound = isMyServiceRunning(PlayerService::class.java)
+    }
+
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            playerViewModel.lastPosition.value = getPositionFromStorage()
+        }
     }
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
@@ -71,15 +78,22 @@ class PlayerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentPlayerBinding.inflate(layoutInflater, container, false)
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
-        setupUI(position)
         playAudio()
+        positionObserver()
         seekBarChangeListener()
+        playPause()
+        skipToNext()
+        skipToPrevious()
+        shuffle()
+        repeat()
     }
 
     private fun playAudio() {
@@ -108,12 +122,67 @@ class PlayerFragment : Fragment() {
                 .placeholder(R.drawable.im_default)
                 .into(playerAlbumArt)
 
-            playerName.text = music.name
+            if(playerName.text != music.name) playerName.text = music.name
             playerArtist.text = music.artist
             rightDuration.text = music.duration
         }
 
     }
+
+    private fun playPause() {
+        binding.playerPlay.setOnClickListener {
+            if (storageUtil.isPlayingPosition()) {
+                binding.playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
+                pause()
+            } else {
+                binding.playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
+                resume()
+            }
+        }
+    }
+
+    private fun resume() {
+        sendBroadcast(ACTION_PLAY)
+    }
+
+    private fun pause() {
+        sendBroadcast(ACTION_PAUSE)
+    }
+
+    private fun shuffle() {
+        binding.playerShuffle.setOnClickListener {
+            sendBroadcast(ACTION_SHUFFLE)
+        }
+    }
+
+    private fun repeat() {
+        binding.playerRepeat.setOnClickListener {
+            sendBroadcast(ACTION_REPEAT)
+        }
+    }
+
+    private fun skipToNext() {
+        binding.playerNext.setOnClickListener {
+            sendBroadcast(ACTION_NEXT)
+            playerViewModel.lastPosition.value = if (position == musicList.lastIndex) {
+                0
+            } else {
+                ++position
+            }
+        }
+    }
+
+    private fun skipToPrevious() {
+        binding.playerPrevious.setOnClickListener {
+            sendBroadcast(ACTION_PREVIOUS)
+            playerViewModel.lastPosition.value = if (position == 0) {
+                musicList.lastIndex
+            } else {
+                --position
+            }
+        }
+    }
+
 
     private fun seekBarChangeListener() {
         binding.playerSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -133,6 +202,18 @@ class PlayerFragment : Fragment() {
         })
     }
 
+    private fun positionObserver() {
+        playerViewModel.lastPosition.observe(viewLifecycleOwner) {
+            setupUI(it)
+        }
+    }
+
+    private fun sendBroadcast(action: String) {
+        val broadcastIntent = Intent(Broadcast_AUDIO_ACTION)
+        broadcastIntent.putExtra(AUDIO_ACTION, action)
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(broadcastIntent)
+    }
+
     private fun getMusicFromStorage(): ArrayList<Music> {
         return storageUtil.loadAudio()
     }
@@ -143,6 +224,7 @@ class PlayerFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
         mBinding = null
     }
 }

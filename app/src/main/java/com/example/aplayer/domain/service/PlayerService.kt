@@ -25,6 +25,8 @@ import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.data.player.PlayerRepository
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.Broadcast_PLAYING_POSITION
+import com.example.aplayer.presenter.player.Broadcast_AUDIO_ACTION
+import com.example.aplayer.presenter.player.AUDIO_ACTION
 import com.example.aplayer.utils.PlaybackStatus
 import java.io.IOException
 
@@ -34,6 +36,9 @@ const val ACTION_PAUSE = "com.example.aplayer.ACTION_PAUSE"
 const val ACTION_PREVIOUS = "com.example.aplayer.ACTION_PREVIOUS"
 const val ACTION_NEXT = "com.example.aplayer.ACTION_NEXT"
 const val ACTION_STOP = "com.example.aplayer.ACTION_STOP"
+const val ACTION_REPEAT = "com.example.aplayer.ACTION_REPEAT"
+const val ACTION_SHUFFLE = "com.example.aplayer.ACTION_SHUFFLE"
+const val ACTION_SEEK = "com.example.aplayer.ACTION_SEEK"
 
 class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -62,6 +67,30 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     //NotificationHelper
     private val notificationHelper by lazy { NotificationHelper(this) }
 
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.getStringExtra(AUDIO_ACTION)) {
+                ACTION_NEXT -> {
+                    skipToNext()
+                }
+                ACTION_PREVIOUS -> {
+                   skipToPrevious()
+                }
+                ACTION_PAUSE -> {
+                    pauseMusic()
+                }
+                ACTION_PLAY -> {
+                    resumeMusic()
+                }
+                ACTION_REPEAT -> {
+                    repeatMusic()
+                }
+                ACTION_SHUFFLE -> {
+                    shuffleMusic()
+                }
+            }
+        }
+    }
     override fun onBind(intent: Intent?): IBinder = iBinder
 
     override fun onCreate() {
@@ -73,8 +102,10 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         callStateListener()
         //ACTION_AUDIO_BECOMING_NOISY -- change in audio outputs -- BroadcastReceiver
         registerBecomingNoisyReceiver()
-        //Listen for new Audio to play -- BroadcastReceiver
+        //Listen for new Audio to play from PlayerFragment -- BroadcastReceiver
         registerPlayNewAudio()
+        //Listen for next/previous Audio to play from PlayerFragment -- BroadcastReceiver
+        registerSkipPreviousReceiver()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -142,6 +173,12 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             resumePosition = mediaPlayer.currentPosition
             storageUtil.storeIsPlayingPosition(false)
         }
+        notificationHelper.updateNotification(
+            PlaybackStatus.PAUSED,
+            activeAudio,
+            mediaSession
+        )
+        sendBroadcast()
     }
 
     override fun resumeMusic() {
@@ -150,6 +187,12 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             mediaPlayer.start()
             storageUtil.storeIsPlayingPosition(true)
         }
+        notificationHelper.updateNotification(
+            PlaybackStatus.PLAYING,
+            activeAudio,
+            mediaSession
+        )
+        sendBroadcast()
     }
 
     override fun seekMusic(progress: Int) {
@@ -161,10 +204,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     }
 
     override fun shuffleMusic() {
-    }
-
-    override fun isPlaying(): Boolean {
-        return mediaPlayer.isPlaying
+        musicList = musicList.shuffled()
     }
 
     override fun initMediaPlayer() {
@@ -188,7 +228,9 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
-        skipToNext()
+        if(!mediaPlayer.isLooping) {
+            skipToNext()
+        }
         // removeNotification()
         //stop the service
         //stopSelf()
@@ -283,12 +325,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         }
     }
 
-    private fun registerBecomingNoisyReceiver() {
-        //register after getting audio focus
-        val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        registerReceiver(becomingNoisyReceiver, intentFilter)
-    }
-
     private fun callStateListener() {
         // Get the telephony manager
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
@@ -347,6 +383,17 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         registerReceiver(playNewAudio, filter)
     }
 
+    private fun registerBecomingNoisyReceiver() {
+        //register after getting audio focus
+        val intentFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        registerReceiver(becomingNoisyReceiver, intentFilter)
+    }
+
+    private fun registerSkipPreviousReceiver() {
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(receiver, IntentFilter(Broadcast_AUDIO_ACTION))
+    }
+
     @Throws(RemoteException::class)
     private fun initMediaSession() {
         if (mediaSessionManager != null) return  //mediaSessionManager exists
@@ -370,47 +417,21 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
             override fun onPlay() {
                 super.onPlay()
                 resumeMusic()
-                notificationHelper.updateNotification(
-                    PlaybackStatus.PLAYING,
-                    activeAudio,
-                    mediaSession
-                )
-                sendBroadcast()
             }
 
             override fun onPause() {
                 super.onPause()
                 pauseMusic()
-                notificationHelper.updateNotification(
-                    PlaybackStatus.PAUSED,
-                    activeAudio,
-                    mediaSession
-                )
-                sendBroadcast()
             }
 
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 skipToNext()
-                updateMetaData()
-                notificationHelper.updateNotification(
-                    PlaybackStatus.PLAYING,
-                    activeAudio,
-                    mediaSession
-                )
-                sendBroadcast()
             }
 
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 skipToPrevious()
-                updateMetaData()
-                notificationHelper.updateNotification(
-                    PlaybackStatus.PLAYING,
-                    activeAudio,
-                    mediaSession
-                )
-                sendBroadcast()
             }
 
             override fun onStop() {
@@ -457,6 +478,13 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         //reset mediaPlayer
         mediaPlayer.reset()
         initMediaPlayer()
+        updateMetaData()
+        notificationHelper.updateNotification(
+            PlaybackStatus.PLAYING,
+            activeAudio,
+            mediaSession
+        )
+        sendBroadcast()
     }
 
     override fun skipToPrevious() {
@@ -476,6 +504,13 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         //reset mediaPlayer
         mediaPlayer.reset()
         initMediaPlayer()
+        updateMetaData()
+        notificationHelper.updateNotification(
+            PlaybackStatus.PLAYING,
+            activeAudio,
+            mediaSession
+        )
+        sendBroadcast()
     }
 
     private fun removeNotification() {
@@ -518,6 +553,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         //unregister BroadcastReceivers
         unregisterReceiver(becomingNoisyReceiver)
         unregisterReceiver(playNewAudio)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
 
         removeAudioFocus()
         removeNotification()
