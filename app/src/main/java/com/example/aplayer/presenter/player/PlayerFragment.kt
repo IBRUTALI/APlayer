@@ -7,6 +7,7 @@ import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -43,8 +44,12 @@ class PlayerFragment : Fragment() {
         isServiceBound = isMyServiceRunning(PlayerService::class.java)
     }
 
+    //Player service next/previous and play/pause receiver
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            if(storageUtil.isPlayingPosition()) {
+                binding.playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
+            } else binding.playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
             playerViewModel.lastPosition.value = getPositionFromStorage()
         }
     }
@@ -126,11 +131,11 @@ class PlayerFragment : Fragment() {
             playerArtist.text = music.artist
             rightDuration.text = music.duration
         }
-
     }
 
     private fun playPause() {
         binding.playerPlay.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             if (storageUtil.isPlayingPosition()) {
                 binding.playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
                 pause()
@@ -151,18 +156,21 @@ class PlayerFragment : Fragment() {
 
     private fun shuffle() {
         binding.playerShuffle.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             sendBroadcast(ACTION_SHUFFLE)
         }
     }
 
     private fun repeat() {
         binding.playerRepeat.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             sendBroadcast(ACTION_REPEAT)
         }
     }
 
     private fun skipToNext() {
         binding.playerNext.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             sendBroadcast(ACTION_NEXT)
             playerViewModel.lastPosition.value = if (position == musicList.lastIndex) {
                 0
@@ -174,6 +182,7 @@ class PlayerFragment : Fragment() {
 
     private fun skipToPrevious() {
         binding.playerPrevious.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             sendBroadcast(ACTION_PREVIOUS)
             playerViewModel.lastPosition.value = if (position == 0) {
                 musicList.lastIndex

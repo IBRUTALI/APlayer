@@ -12,6 +12,7 @@ import io.reactivex.Single
 
 
 class ProviderRepositoryImpl(private val context: Context) : ProviderRepository {
+    private val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
     override fun getMusic(): Single<List<Music>> {
         return Single.create { subscriber ->
@@ -19,7 +20,6 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                 val listMusic = ArrayList<Music>()
                 val contentResolver = context.contentResolver
                 val storageUtil = StorageUtil(context)
-                val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val audioCursor =
                     contentResolver.query(uri, null, null, null, null).use { cursor ->
                         cursor?.let {
@@ -69,19 +69,18 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
     }
 
     private fun getMusicUriById(musicId: Long): Uri{
-        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, musicId)
+        return ContentUris.withAppendedId(uri, musicId)
     }
 
     private fun parseMusic(music: Music): Music {
         var name = music.name?.replace("_", " ")
-        val artist: String?
         name = name?.replace(".mp3", "")
         name = name?.replace(".m4a", "")
-        if(music.artist == null || music.artist == "<unknown>") {
-            artist = "Неизвестно"
+        val artist: String = if(music.artist == null || music.artist == "<unknown>") {
+            "Неизвестный исполнитель"
         } else {
-            artist = music.artist.replaceFirstChar { char -> char.uppercaseChar() }
-            name = "$artist - $name"
+            name = name?.replace(music.artist + " - ", "")
+            music.artist.replaceFirstChar { char -> char.uppercaseChar() }
         }
         return music.copy(
             name = name,

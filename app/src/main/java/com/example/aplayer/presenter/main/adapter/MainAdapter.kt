@@ -53,6 +53,7 @@ class MainAdapter(
                 with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
                     musicItemDuration.text = musicList[position].duration
+                    musicItemArtist.text = musicList[position].artist
                     if (playingPosition == position && isPlayingPosition) {
                         musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
