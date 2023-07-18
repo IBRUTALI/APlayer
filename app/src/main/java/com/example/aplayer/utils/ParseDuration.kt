@@ -2,7 +2,7 @@ package com.example.aplayer.utils
 
 import java.util.concurrent.TimeUnit
 
-fun Int.secondsToTime(): String {
+fun Int?.millisecondsToTime(): String {
     return if (this != null) {
         String.format(
             "%d:%02d",
@@ -13,7 +13,7 @@ fun Int.secondsToTime(): String {
     } else "0:00"
 }
 
-fun Long.secondsToTime(): String {
+fun Long?.millisecondsToTime(): String {
     return if (this != null) {
         String.format(
             "%d:%02d",

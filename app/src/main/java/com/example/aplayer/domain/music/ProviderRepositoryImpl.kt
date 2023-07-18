@@ -7,7 +7,6 @@ import android.provider.MediaStore
 import com.example.aplayer.data.music.ProviderRepository
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.utils.secondsToTime
 import io.reactivex.Single
 
 
@@ -35,7 +34,6 @@ class ProviderRepositoryImpl(private val context: Context) : ProviderRepository 
                                         cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME))
                                     val duration =
                                         cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION))
-                                            .secondsToTime()
                                     val size =
                                         cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE))
                                     val musicId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))

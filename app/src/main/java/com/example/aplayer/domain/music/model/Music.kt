@@ -12,5 +12,5 @@ data class Music(
     val artist: String? = "Неизвестно",
     val size: String? = null,
     val name: String? = null,
-    val duration: String? = null
+    val duration: Long? = null
 ): Parcelable

@@ -22,6 +22,7 @@ import com.example.aplayer.MainActivity
 import com.example.aplayer.R
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.utils.PlaybackStatus
+import com.example.aplayer.utils.millisecondsToTime
 
 private const val CHANNEL_ID = "media_playback_channel"
 private const val CHANNEL_NAME = "Media playback"
@@ -100,7 +101,7 @@ class NotificationHelper(private val context: Context) {
         val notificationBuilder = buildNotification(playbackStatus, mediaSession)
             .setContentText(activeAudio.artist)
             .setContentTitle(activeAudio.name)
-            .setContentInfo(activeAudio.duration)
+            .setContentInfo(activeAudio.duration.millisecondsToTime())
             .setContentIntent(contentIntent)
 
         var drawable = AppCompatResources.getDrawable(context, R.drawable.im_default)!!

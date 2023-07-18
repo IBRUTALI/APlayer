@@ -13,6 +13,7 @@ import com.example.aplayer.databinding.MusicItemGridBinding
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.adapter.AdapterState.*
 import com.example.aplayer.utils.MainDiffUtil
+import com.example.aplayer.utils.millisecondsToTime
 import kotlin.properties.Delegates
 
 class MainAdapter(
@@ -52,7 +53,7 @@ class MainAdapter(
                 val viewHolder = holder as MainViewHolder
                 with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
-                    musicItemDuration.text = musicList[position].duration
+                    musicItemDuration.text = musicList[position].duration.millisecondsToTime()
                     musicItemArtist.text = musicList[position].artist
                     if (playingPosition == position && isPlayingPosition) {
                         musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
@@ -70,7 +71,7 @@ class MainAdapter(
                 val viewHolder = holder as MainGridViewHolder
                 with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
-                    musicItemDuration.text = musicList[position].duration
+                    musicItemDuration.text = musicList[position].duration.millisecondsToTime()
                     if (playingPosition == position && isPlayingPosition) {
                         musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)

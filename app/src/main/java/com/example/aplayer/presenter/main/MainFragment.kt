@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -86,8 +87,9 @@ class MainFragment : Fragment() {
     private fun itemClickListener() {
         adapter.setOnClickListener(object : MainAdapter.OnClickListener {
             override fun onClick(position: Int, list: ArrayList<Music>) {
-                storageUtil.storeAudioIndex(position)
-                findNavController().navigate(R.id.action_mainFragment_to_playerFragment)
+                val bundle = Bundle()
+                bundle.putInt("item position", position)
+                findNavController().navigate(R.id.action_mainFragment_to_playerFragment, bundle)
             }
         })
     }
