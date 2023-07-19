@@ -18,4 +18,5 @@
     <string name="list">Список</string>
     <string name="tile">Плитка</string>
     <string name="favorite">Избранное</string>
+    <string name="timer">0:00</string>
 </resources>

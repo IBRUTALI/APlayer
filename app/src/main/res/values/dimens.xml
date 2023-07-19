@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <dimen name="player_small_icon">30dp</dimen>
+    <dimen name="player_default_icon">40dp</dimen>
+    <dimen name="player_big_icon">65dp</dimen>
+</resources>

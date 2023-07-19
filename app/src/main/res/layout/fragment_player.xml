@@ -63,8 +63,8 @@
 
     <ImageView
         android:id="@+id/player_dislike"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/player_small_icon"
+        android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/outline_dislike"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toTopOf="@+id/player_name"
@@ -72,8 +72,8 @@
 
     <ImageView
         android:id="@+id/player_like"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/player_small_icon"
+        android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/outline_like"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
         app:layout_constraintTop_toTopOf="@+id/player_name"
@@ -83,13 +83,14 @@
         android:id="@+id/player_seek_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:progressBackgroundTint="?attr/colorPrimaryVariant"
         android:progressTint="?attr/colorPrimary"
         android:scaleX="1.12"
         android:scaleY="1.12"
         android:thumbTint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toBottomOf="@+id/player_artist" />
 
@@ -97,7 +98,7 @@
         android:id="@+id/leftDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0:00"
+        android:text="@string/timer"
         android:textColor="?attr/colorPrimary"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/player_seek_bar"
@@ -107,7 +108,7 @@
         android:id="@+id/rightDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0:00"
+        android:text="@string/timer"
         android:textColor="?attr/colorPrimary"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
@@ -115,9 +116,9 @@
 
     <ImageView
         android:id="@+id/player_play"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="@dimen/player_big_icon"
+        android:layout_height="@dimen/player_big_icon"
+        android:layout_marginTop="20dp"
         android:src="@drawable/baseline_pause_circle_filled"
         app:layout_constraintEnd_toStartOf="@+id/player_next"
         app:layout_constraintStart_toEndOf="@+id/player_previous"
@@ -126,8 +127,8 @@
 
     <ImageView
         android:id="@+id/player_previous"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/player_default_icon"
+        android:layout_height="@dimen/player_default_icon"
         android:layout_marginStart="35dp"
         android:src="@drawable/baseline_skip_previous"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
@@ -137,8 +138,8 @@
 
     <ImageView
         android:id="@+id/player_next"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="@dimen/player_default_icon"
+        android:layout_height="@dimen/player_default_icon"
         android:layout_marginEnd="35dp"
         android:src="@drawable/baseline_skip_next"
         app:layout_constraintBottom_toBottomOf="@+id/player_play"
@@ -148,8 +149,8 @@
 
     <ImageView
         android:id="@+id/player_repeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/player_small_icon"
+        android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/baseline_repeat"
         app:layout_constraintBottom_toBottomOf="@+id/player_next"
         app:layout_constraintEnd_toEndOf="@+id/player_seek_bar"
@@ -158,8 +159,8 @@
 
     <ImageView
         android:id="@+id/player_shuffle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/player_small_icon"
+        android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/baseline_shuffle"
         app:layout_constraintBottom_toBottomOf="@+id/player_previous"
         app:layout_constraintStart_toStartOf="@+id/player_seek_bar"

@@ -31,6 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 const val Broadcast_PLAYING_POSITION = "play_pause"
+const val ITEM_POSITION = "item_position"
 
 class MainFragment : Fragment() {
     private var mBinding: FragmentMainBinding? = null
@@ -88,7 +89,9 @@ class MainFragment : Fragment() {
         adapter.setOnClickListener(object : MainAdapter.OnClickListener {
             override fun onClick(position: Int, list: ArrayList<Music>) {
                 val bundle = Bundle()
-                bundle.putInt("item position", position)
+                val currentPosition = storageUtil.loadAudioIndex()
+                bundle.putInt(ITEM_POSITION, currentPosition)
+                storageUtil.storeAudioIndex(position)
                 findNavController().navigate(R.id.action_mainFragment_to_playerFragment, bundle)
             }
         })

@@ -18,7 +18,9 @@ class PlayerViewModel : ViewModel() {
     private var job: Job? = null
 
     fun setStartDuration(value: Int) {
-        _duration.value = value
+        viewModelScope.launch(Dispatchers.Default) {
+            _duration.postValue(value)
+        }
     }
 
     fun setLastPosition(value: Int) {

@@ -57,6 +57,18 @@ class StorageUtil(private val context: Context) {
         editor.apply()
     }
 
+    fun storeCurrentDuration(duration: Int) {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putInt(CURRENT_DURATION, duration)
+        editor.apply()
+    }
+
+    fun loadCurrentDuration(): Int {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE)
+        return preferences.getInt(CURRENT_DURATION, 0)
+    }
+
     fun isPlayingPosition(): Boolean {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE)
         return preferences.getBoolean(IS_PLAYING_POSITION, false)
@@ -66,6 +78,7 @@ class StorageUtil(private val context: Context) {
         const val IS_PLAYING_POSITION = "Is playing position"
         const val CURRENT_POSITION = "Current position"
         const val MUSIC_LIST = "Music list"
+        const val CURRENT_DURATION = "Current duration"
     }
 
 }

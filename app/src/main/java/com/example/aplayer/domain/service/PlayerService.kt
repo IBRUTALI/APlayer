@@ -169,8 +169,8 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
         mediaPlayer.seekTo(progress)
     }
 
-    fun getCurrentDuration(): Int {
-        return mediaPlayer.currentPosition
+    fun storeCurrentDuration() {
+        storageUtil.storeCurrentDuration(mediaPlayer.currentPosition)
     }
 
     override fun repeatMusic() {

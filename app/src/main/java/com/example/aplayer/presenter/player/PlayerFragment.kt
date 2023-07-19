@@ -20,11 +20,9 @@ import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.domain.service.*
 import com.example.aplayer.presenter.main.Broadcast_PLAYING_POSITION
+import com.example.aplayer.presenter.main.ITEM_POSITION
 import com.example.aplayer.utils.millisecondsToTime
 import kotlin.properties.Delegates
-
-//const val Broadcast_AUDIO_ACTION = "Broadcast_AUDIO_ACTION"
-//const val AUDIO_ACTION = "audio_action"
 
 class PlayerFragment : Fragment() {
     private var mBinding: FragmentPlayerBinding? = null
@@ -44,8 +42,10 @@ class PlayerFragment : Fragment() {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
             player = binder.getService()
-            //playerViewModel.setPlayer(player)
-            playerViewModel.launchSeekCount(storageUtil.isPlayingPosition())
+            if(position != itemPosition && itemPosition != -1) {
+                playerViewModel.setStartDuration(0)
+                playerViewModel.launchSeekCount(storageUtil.isPlayingPosition())
+            } else launchSeekCount(storageUtil.isPlayingPosition())
             isServiceBound = true
         }
 
@@ -57,15 +57,14 @@ class PlayerFragment : Fragment() {
     //Player service next/previous and play/pause receiver
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (storageUtil.isPlayingPosition()) {
-                binding.playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
-            } else binding.playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
+            val isPlaying = storageUtil.isPlayingPosition()
+            setPlayPauseIcon(isPlaying)
             val pos = getPositionFromStorage()
             if (pos != playerViewModel.lastPosition.value) {
                 playerViewModel.setStartDuration(0)
                 playerViewModel.setLastPosition(pos)
             }
-            playerViewModel.launchSeekCount(storageUtil.isPlayingPosition())
+            playerViewModel.launchSeekCount(isPlaying)
         }
     }
 
@@ -112,7 +111,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun playAudio() {
-        storageUtil.storeAudioIndex(itemPosition)
+        val isPlaying = storageUtil.isPlayingPosition()
         if (player == null) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
             activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
@@ -120,19 +119,17 @@ class PlayerFragment : Fragment() {
         //Check is service is active
         if (!isServiceBound) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
-            playerViewModel.setLastPosition(itemPosition)
+            playerViewModel.setLastPosition(position)
             activity?.startService(playerIntent)
-        } else if (position != itemPosition) {
+        } else if (position != itemPosition && itemPosition != -1) {
             //Service is active
             //Send media with BroadcastReceiver
-            playerViewModel.setLastPosition(itemPosition)
-            playerViewModel.setStartDuration(0)
+            playerViewModel.setLastPosition(position)
             val broadcastIntent = Intent(Broadcast_PLAY_NEW_AUDIO)
             activity?.sendBroadcast(broadcastIntent)
+            launchSeekCount(storageUtil.isPlayingPosition())
         } else {
-            val isPlaying = storageUtil.isPlayingPosition()
-            playerViewModel.setLastPosition(itemPosition)
-            launchSeekCount(isPlaying)
+            playerViewModel.setLastPosition(position)
             setPlayPauseIcon(isPlaying)
         }
     }
@@ -149,10 +146,10 @@ class PlayerFragment : Fragment() {
                 playerName.text = music.name
                 playerArtist.text = music.artist
                 rightDuration.text = music.duration.millisecondsToTime()
-                leftDuration.text = "0:00"
+                leftDuration.text = getString(R.string.timer)
+                binding.playerSeekBar.progress = 0
+                binding.playerSeekBar.max = music.duration?.toInt() ?: 0
             }
-            binding.playerSeekBar.progress = 0
-            binding.playerSeekBar.max = music.duration?.toInt() ?: 0
         }
     }
 
@@ -160,10 +157,8 @@ class PlayerFragment : Fragment() {
         binding.playerPlay.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
             if (storageUtil.isPlayingPosition()) {
-                binding.playerPlay.setImageResource(R.drawable.baseline_play_circle_filled)
                 player?.pauseMusic()
             } else {
-                binding.playerPlay.setImageResource(R.drawable.baseline_pause_circle_filled)
                 player?.resumeMusic()
             }
         }
@@ -214,11 +209,11 @@ class PlayerFragment : Fragment() {
 
         })
     }
+
     private fun launchSeekCount(isPlaying: Boolean) {
-        player?.getCurrentDuration()?.let {
-            playerViewModel.setStartDuration(it)
-            playerViewModel.launchSeekCount(isPlaying)
-        }
+        player?.storeCurrentDuration()
+        playerViewModel.setStartDuration(storageUtil.loadCurrentDuration())
+        playerViewModel.launchSeekCount(isPlaying)
     }
 
     private fun setPlayPauseIcon(isPlaying: Boolean) {
@@ -251,12 +246,13 @@ class PlayerFragment : Fragment() {
     }
 
     private fun getPositionFromBundle(): Int? {
-        return arguments?.getInt("item position")
+        return arguments?.getInt(ITEM_POSITION)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        arguments?.putInt(ITEM_POSITION, playerViewModel.lastPosition.value ?: -1)
         playerViewModel.setStartDuration(binding.playerSeekBar.progress)
         mBinding = null
     }
