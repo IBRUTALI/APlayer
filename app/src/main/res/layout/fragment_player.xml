@@ -25,29 +25,37 @@
 
     </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:id="@+id/player_name"
+    <LinearLayout
+        android:id="@+id/textViewLinear"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:text="@string/name"
-        android:textAlignment="center"
-        android:textColor="?attr/colorPrimaryVariant"
-        android:textSize="20sp"
-        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/player_like"
         app:layout_constraintStart_toEndOf="@+id/player_dislike"
         app:layout_constraintTop_toBottomOf="@+id/player_card_view">
-        <requestFocus />
-    </TextView>
+
+        <TextView
+            android:id="@+id/player_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/name"
+            android:textAlignment="center"
+            android:textColor="?attr/colorPrimaryVariant"
+            android:textSize="20sp"
+            android:textStyle="bold">
+
+            <requestFocus />
+        </TextView>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/player_artist"
@@ -57,17 +65,18 @@
         android:text="@string/artist"
         android:textAlignment="center"
         android:textColor="?attr/colorPrimaryVariant"
-        app:layout_constraintEnd_toEndOf="@+id/player_name"
-        app:layout_constraintStart_toStartOf="@+id/player_name"
-        app:layout_constraintTop_toBottomOf="@+id/player_name" />
+        app:layout_constraintEnd_toEndOf="@+id/textViewLinear"
+        app:layout_constraintStart_toStartOf="@+id/textViewLinear"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLinear" />
 
     <ImageView
         android:id="@+id/player_dislike"
         android:layout_width="@dimen/player_small_icon"
         android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/outline_dislike"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewLinear"
         app:layout_constraintStart_toStartOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/player_name"
+        app:layout_constraintTop_toTopOf="@+id/textViewLinear"
         app:tint="?attr/colorPrimary" />
 
     <ImageView
@@ -75,8 +84,9 @@
         android:layout_width="@dimen/player_small_icon"
         android:layout_height="@dimen/player_small_icon"
         android:src="@drawable/outline_like"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewLinear"
         app:layout_constraintEnd_toEndOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/player_name"
+        app:layout_constraintTop_toTopOf="@+id/textViewLinear"
         app:tint="?attr/colorPrimary" />
 
     <SeekBar

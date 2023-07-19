@@ -13,8 +13,10 @@ class PlayerViewModel : ViewModel() {
 
     private val _lastPosition = MutableLiveData(-1)
     val lastPosition: LiveData<Int> = _lastPosition
+
     private val _duration = MutableLiveData(0)
     val duration: LiveData<Int> = _duration
+
     private var job: Job? = null
 
     fun setStartDuration(value: Int) {
@@ -26,6 +28,7 @@ class PlayerViewModel : ViewModel() {
     fun setLastPosition(value: Int) {
         _lastPosition.value = value
     }
+
     fun launchSeekCount(isPlaying: Boolean) {
         if (!isPlaying) {
             job?.cancel()

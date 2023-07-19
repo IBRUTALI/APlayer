@@ -34,23 +34,24 @@ class PlayerFragment : Fragment() {
         ownerProducer = { requireActivity() }
     )
     private var player: PlayerService? = null
-    private var isServiceBound by Delegates.notNull<Boolean>()
+    private var isServiceStarted by Delegates.notNull<Boolean>()
     private val storageUtil by lazy { StorageUtil(requireContext()) }
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            //We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder: PlayerService.LocalBinder = service as PlayerService.LocalBinder
             player = binder.getService()
-            if(position != itemPosition && itemPosition != -1) {
+            val isPlaying = storageUtil.isPlayingPosition()
+            if (position != itemPosition && itemPosition != -1) {
                 playerViewModel.setStartDuration(0)
-                playerViewModel.launchSeekCount(storageUtil.isPlayingPosition())
-            } else launchSeekCount(storageUtil.isPlayingPosition())
-            isServiceBound = true
+                playerViewModel.launchSeekCount(isPlaying)
+            } else launchSeekCount(isPlaying)
+            isServiceStarted = true
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            isServiceBound = false
+            isServiceStarted = false
         }
     }
 
@@ -58,8 +59,8 @@ class PlayerFragment : Fragment() {
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val isPlaying = storageUtil.isPlayingPosition()
-            setPlayPauseIcon(isPlaying)
             val pos = getPositionFromStorage()
+            setPlayPauseIcon(isPlaying)
             if (pos != playerViewModel.lastPosition.value) {
                 playerViewModel.setStartDuration(0)
                 playerViewModel.setLastPosition(pos)
@@ -82,6 +83,7 @@ class PlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
+        bindService()
         playAudio()
         positionObserver()
         durationObserver()
@@ -97,7 +99,7 @@ class PlayerFragment : Fragment() {
         musicList = getMusicFromStorage()
         position = getPositionFromStorage()
         itemPosition = getPositionFromBundle() ?: -1
-        isServiceBound = isMyServiceRunning(PlayerService::class.java)
+        isServiceStarted = isMyServiceRunning(PlayerService::class.java)
     }
 
     private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
@@ -110,23 +112,27 @@ class PlayerFragment : Fragment() {
         return false
     }
 
-    private fun playAudio() {
-        val isPlaying = storageUtil.isPlayingPosition()
+    private fun bindService() {
         if (player == null) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
             activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
-        //Check is service is active
-        if (!isServiceBound) {
+    }
+
+    private fun playAudio() {
+        val isPlaying = storageUtil.isPlayingPosition()
+        //Check is first start of service
+        if (!isServiceStarted) {
             val playerIntent = Intent(requireContext(), PlayerService::class.java)
             playerViewModel.setLastPosition(position)
             activity?.startService(playerIntent)
         } else if (position != itemPosition && itemPosition != -1) {
-            //Service is active
+            //Service is already active
             //Send media with BroadcastReceiver
             playerViewModel.setLastPosition(position)
             val broadcastIntent = Intent(Broadcast_PLAY_NEW_AUDIO)
             activity?.sendBroadcast(broadcastIntent)
+            //Start seek bar animation
             launchSeekCount(storageUtil.isPlayingPosition())
         } else {
             playerViewModel.setLastPosition(position)
@@ -134,22 +140,21 @@ class PlayerFragment : Fragment() {
         }
     }
 
+    //Set or update UI
     private fun setupUI(position: Int) {
         val music = musicList[position]
         with(binding) {
-            if (playerName.text != music.name) {
-                Glide.with(requireContext())
-                    .load(music.artUri)
-                    .centerCrop()
-                    .placeholder(R.drawable.im_default)
-                    .into(playerAlbumArt)
-                playerName.text = music.name
-                playerArtist.text = music.artist
-                rightDuration.text = music.duration.millisecondsToTime()
-                leftDuration.text = getString(R.string.timer)
-                binding.playerSeekBar.progress = 0
-                binding.playerSeekBar.max = music.duration?.toInt() ?: 0
-            }
+            Glide.with(requireContext())
+                .load(music.artUri)
+                .centerCrop()
+                .placeholder(R.drawable.im_default)
+                .into(playerAlbumArt)
+            playerName.text = music.name
+            playerArtist.text = music.artist
+            rightDuration.text = music.duration.millisecondsToTime()
+            leftDuration.text = getString(R.string.timer)
+            binding.playerSeekBar.progress = 0
+            binding.playerSeekBar.max = music.duration?.toInt() ?: 0
         }
     }
 
@@ -167,6 +172,7 @@ class PlayerFragment : Fragment() {
     private fun shuffle() {
         binding.playerShuffle.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_click))
+            player?.shuffleMusic()
         }
     }
 
@@ -200,13 +206,12 @@ class PlayerFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
+                player?.resumeMusic()
                 player?.seekMusic(seekBar.progress)
             }
-
         })
     }
 
@@ -233,7 +238,8 @@ class PlayerFragment : Fragment() {
     private fun durationObserver() {
         playerViewModel.duration.observe(viewLifecycleOwner) {
             binding.playerSeekBar.progress = it
-            binding.leftDuration.text = it.millisecondsToTime()
+            val timer = it.millisecondsToTime()
+            binding.leftDuration.text = timer
         }
     }
 
@@ -252,6 +258,8 @@ class PlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        //Replace arguments from MainFragment.
+        //This makes it possible to save the screen state when switching tracks using the service.
         arguments?.putInt(ITEM_POSITION, playerViewModel.lastPosition.value ?: -1)
         playerViewModel.setStartDuration(binding.playerSeekBar.progress)
         mBinding = null
