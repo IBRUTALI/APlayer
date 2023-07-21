@@ -1,17 +1,21 @@
 package com.example.aplayer.presenter.main
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
@@ -50,13 +54,22 @@ class MainFragment : Fragment() {
         }
     }
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                getMusic()
+            }
+        }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requestPermissions()
         val state = settingsUtil.loadListStyle()
         indexState = state
         adapter = MainAdapter(state.toAdapterState())
         switchAdapterLayouts(state)
-        getMusic()
         playingPositionObserver()
     }
 
@@ -81,8 +94,7 @@ class MainFragment : Fragment() {
                 adapter.setList(list)
             }, { th ->
                 Log.e("!@#", th.message.toString())
-            }
-            )
+            })
     }
 
     private fun itemClickListener() {
@@ -163,6 +175,40 @@ class MainFragment : Fragment() {
                 adapter.setList(musicList)
                 settingsUtil.storeListStyle(AdapterState.GRID)
                 itemClickListener()
+            }
+        }
+    }
+
+    private fun requestPermissions() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                requestPermissionLauncher.launch(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) -> {
+                requestPermissionLauncher.launch(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.READ_PHONE_STATE
+            ) -> {
+                requestPermissionLauncher.launch(
+                    Manifest.permission.READ_PHONE_STATE
+                )
+            }
+            else -> {
+                requestPermissionLauncher.launch(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
             }
         }
     }

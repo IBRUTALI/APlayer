@@ -13,14 +13,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.example.aplayer.Broadcast_PLAY_NEW_AUDIO
 import com.example.aplayer.R
 import com.example.aplayer.data.music.StorageUtil
 import com.example.aplayer.databinding.FragmentPlayerBinding
 import com.example.aplayer.domain.music.model.Music
-import com.example.aplayer.domain.service.*
+import com.example.aplayer.domain.service.PlayerService
 import com.example.aplayer.presenter.main.Broadcast_PLAYING_POSITION
 import com.example.aplayer.presenter.main.ITEM_POSITION
+import com.example.aplayer.utils.DrawableSlidingFactory
 import com.example.aplayer.utils.millisecondsToTime
 import kotlin.properties.Delegates
 
@@ -146,8 +148,9 @@ class PlayerFragment : Fragment() {
         with(binding) {
             Glide.with(requireContext())
                 .load(music.artUri)
+                .transition(DrawableTransitionOptions.with(DrawableSlidingFactory()))
                 .centerCrop()
-                .placeholder(R.drawable.im_default)
+                .error(R.drawable.splash_background)
                 .into(playerAlbumArt)
             playerName.text = music.name
             playerArtist.text = music.artist

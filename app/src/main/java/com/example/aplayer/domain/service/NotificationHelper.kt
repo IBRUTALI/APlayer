@@ -104,7 +104,7 @@ class NotificationHelper(private val context: Context) {
             .setContentInfo(activeAudio.duration.millisecondsToTime())
             .setContentIntent(contentIntent)
 
-        var drawable = AppCompatResources.getDrawable(context, R.drawable.im_default)!!
+        var drawable = AppCompatResources.getDrawable(context, R.drawable.splash_background)!!
         Glide.with(context)
             .asDrawable()
             .load(activeAudio.artUri)

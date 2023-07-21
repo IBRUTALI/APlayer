@@ -60,8 +60,8 @@ class MainAdapter(
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
                     Glide.with(holder.itemView.context)
                         .load(musicList[position].artUri)
-                        .placeholder(R.drawable.im_default)
-                        .error(R.drawable.im_default)
+                        .placeholder(R.drawable.splash_background)
+                        .error(R.drawable.splash_background)
                         .centerCrop()
                         .into(musicItemImage)
                 }
@@ -77,8 +77,8 @@ class MainAdapter(
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
                     Glide.with(holder.itemView.context)
                         .load(musicList[position].artUri)
-                        .placeholder(R.drawable.im_default)
-                        .error(R.drawable.im_default)
+                        .placeholder(R.drawable.splash_background)
+                        .error(R.drawable.splash_background)
                         .centerCrop()
                         .into(musicItemImage)
                 }

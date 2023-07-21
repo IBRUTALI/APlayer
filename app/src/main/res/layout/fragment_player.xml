@@ -21,6 +21,7 @@
             android:id="@+id/player_album_art"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#ff000000"
             tools:src="@tools:sample/avatars" />
 
     </androidx.cardview.widget.CardView>
@@ -29,11 +30,9 @@
         android:id="@+id/textViewLinear"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toStartOf="@+id/player_like"
-        app:layout_constraintStart_toEndOf="@+id/player_dislike"
+        app:layout_constraintEnd_toEndOf="@+id/player_card_view"
+        app:layout_constraintStart_toStartOf="@+id/player_card_view"
         app:layout_constraintTop_toBottomOf="@+id/player_card_view">
 
         <TextView
@@ -68,26 +67,6 @@
         app:layout_constraintEnd_toEndOf="@+id/textViewLinear"
         app:layout_constraintStart_toStartOf="@+id/textViewLinear"
         app:layout_constraintTop_toBottomOf="@+id/textViewLinear" />
-
-    <ImageView
-        android:id="@+id/player_dislike"
-        android:layout_width="@dimen/player_small_icon"
-        android:layout_height="@dimen/player_small_icon"
-        android:src="@drawable/outline_dislike"
-        app:layout_constraintBottom_toBottomOf="@+id/textViewLinear"
-        app:layout_constraintStart_toStartOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/textViewLinear"
-        app:tint="?attr/colorPrimary" />
-
-    <ImageView
-        android:id="@+id/player_like"
-        android:layout_width="@dimen/player_small_icon"
-        android:layout_height="@dimen/player_small_icon"
-        android:src="@drawable/outline_like"
-        app:layout_constraintBottom_toBottomOf="@+id/textViewLinear"
-        app:layout_constraintEnd_toEndOf="@+id/player_card_view"
-        app:layout_constraintTop_toTopOf="@+id/textViewLinear"
-        app:tint="?attr/colorPrimary" />
 
     <SeekBar
         android:id="@+id/player_seek_bar"
@@ -130,9 +109,12 @@
         android:layout_height="@dimen/player_big_icon"
         android:layout_marginTop="20dp"
         android:src="@drawable/baseline_pause_circle_filled"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/player_next"
+        app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toEndOf="@+id/player_previous"
         app:layout_constraintTop_toBottomOf="@+id/player_seek_bar"
+        app:layout_constraintVertical_bias="0.0"
         app:tint="?attr/colorPrimary" />
 
     <ImageView

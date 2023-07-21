@@ -179,6 +179,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun shuffleMusic() {
         //musicList = musicList.shuffled()
+        //TODO - shuffle current music list and save old list somewhere
     }
 
     override fun initMediaPlayer() {
@@ -202,12 +203,11 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
-        if(!mediaPlayer.isLooping) {
+        if(mediaPlayer.isLooping) {
+            //TODO - Repeat music
+        } else {
             skipToNext()
         }
-        // removeNotification()
-        //stop the service
-        //stopSelf()
     }
 
     override fun onPrepared(mp: MediaPlayer?) {
