@@ -12,7 +12,8 @@
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
+            app:destination="@id/playerFragment"
+            app:enterAnim="@anim/slide_up" />
     </fragment>
     <fragment
         android:id="@+id/playerFragment"

@@ -204,7 +204,7 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
         if(mediaPlayer.isLooping) {
-            //TODO - Repeat music
+            //Music is repeating
         } else {
             skipToNext()
         }

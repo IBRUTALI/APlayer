@@ -13,9 +13,9 @@
         android:icon="@drawable/baseline_sort"
         app:iconTint="?attr/colorPrimaryVariant"
         app:showAsAction="always"/>
-    <item android:id="@+id/layout_style"
-        android:title="@string/layout_style"
-        android:icon="@drawable/baseline_queue_music_24"/>
+    <item
+        android:id="@+id/layout_style"
+        android:title="@string/layout_style"/>
     <item
         android:id="@+id/settings"
         android:title="@string/settings" />

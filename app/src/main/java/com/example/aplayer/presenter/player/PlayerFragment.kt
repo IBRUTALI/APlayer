@@ -47,7 +47,7 @@ class PlayerFragment : Fragment() {
             val isPlaying = storageUtil.isPlayingPosition()
             if (position != itemPosition && itemPosition != -1) {
                 playerViewModel.setStartDuration(0)
-                playerViewModel.launchSeekCount(isPlaying)
+                playerViewModel.launchSeekCount(true)
             } else launchSeekCount(isPlaying)
             isServiceStarted = true
         }

@@ -1,5 +1,6 @@
 package com.example.aplayer.presenter.main.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -55,13 +56,14 @@ class MainAdapter(
                     musicItemTitle.text = musicList[position].name
                     musicItemDuration.text = musicList[position].duration.millisecondsToTime()
                     musicItemArtist.text = musicList[position].artist
+                    viewHolder.itemView.isSelected = playingPosition == position
                     if (playingPosition == position && isPlayingPosition) {
                         musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
                     Glide.with(holder.itemView.context)
                         .load(musicList[position].artUri)
-                        .placeholder(R.drawable.splash_background)
-                        .error(R.drawable.splash_background)
+                        .placeholder(R.drawable.item_background)
+                        .error(R.drawable.item_background)
                         .centerCrop()
                         .into(musicItemImage)
                 }
@@ -72,13 +74,14 @@ class MainAdapter(
                 with(viewHolder.binding) {
                     musicItemTitle.text = musicList[position].name
                     musicItemDuration.text = musicList[position].duration.millisecondsToTime()
+                    viewHolder.itemView.isSelected = playingPosition == position
                     if (playingPosition == position && isPlayingPosition) {
                         musicItemPlay.setImageResource(R.drawable.baseline_pause_24)
                     } else musicItemPlay.setImageResource(R.drawable.baseline_play_arrow_24)
                     Glide.with(holder.itemView.context)
                         .load(musicList[position].artUri)
-                        .placeholder(R.drawable.splash_background)
-                        .error(R.drawable.splash_background)
+                        .placeholder(R.drawable.item_background)
+                        .error(R.drawable.item_background)
                         .centerCrop()
                         .into(musicItemImage)
                 }

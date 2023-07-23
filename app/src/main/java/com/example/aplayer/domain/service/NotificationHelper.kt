@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
@@ -78,7 +80,6 @@ class NotificationHelper(private val context: Context) {
                     .setMediaSession(mediaSession.sessionToken) // Show our playback controls in the compact notification view.
                     .setShowActionsInCompactView(0, 1, 2)
             )
-            .setColor(context.getColor(R.color.black_lite_200))
             .setSmallIcon(R.drawable.ic_app_logo)
             .addAction(R.drawable.baseline_skip_previous, "previous", playbackAction(3))
             .addAction(notificationAction, "pause", playPauseAction)
@@ -104,21 +105,19 @@ class NotificationHelper(private val context: Context) {
             .setContentInfo(activeAudio.duration.millisecondsToTime())
             .setContentIntent(contentIntent)
 
-        var drawable = AppCompatResources.getDrawable(context, R.drawable.splash_background)!!
+        val bitmap =  AppCompatResources.getDrawable(context, R.drawable.splash_background)?.toBitmap()
         Glide.with(context)
-            .asDrawable()
+            .asBitmap()
             .load(activeAudio.artUri)
-            .placeholder(R.drawable.im_default)
-            .into(object: CustomTarget<Drawable>() {
+            .into(object: CustomTarget<Bitmap>() {
 
-                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                    drawable = resource
-                    notificationBuilder.setLargeIcon(drawable.toBitmap())
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    notificationBuilder.setLargeIcon(resource)
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
                 }
 
                 override fun onLoadFailed(errorDrawable: Drawable?) {
-                    notificationBuilder.setLargeIcon(drawable.toBitmap())
+                    notificationBuilder.setLargeIcon(bitmap)
                     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
                     super.onLoadFailed(errorDrawable)
                 }
