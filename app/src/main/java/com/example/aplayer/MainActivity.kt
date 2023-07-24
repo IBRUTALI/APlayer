@@ -1,6 +1,8 @@
 package com.example.aplayer
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     private fun prepareRootNavController(navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
         graph.setStartDestination(
-                getTabsDestination()
+            getTabsDestination()
         )
         navController.graph = graph
     }
@@ -148,12 +150,11 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
         navController = null
-        if (isServiceBound) {
-            unbindService(serviceConnection)
-            //service is active
-            player?.stopForeground(true)
+        if(!isChangingConfigurations) {
+            val intent = Intent(this, PlayerService::class.java)
+            stopService(intent)
         }
+
         mBinding = null
-        storageUtil.storeIsPlayingPosition(false)
     }
 }

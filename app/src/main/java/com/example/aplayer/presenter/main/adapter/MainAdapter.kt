@@ -18,7 +18,7 @@ import com.example.aplayer.utils.millisecondsToTime
 import kotlin.properties.Delegates
 
 class MainAdapter(
-   private val state: AdapterState
+    private val state: AdapterState
 ) : RecyclerView.Adapter<ViewHolder>() {
     private var onClickListener: OnClickListener? = null
     private var musicList = emptyList<Music>()
@@ -34,11 +34,13 @@ class MainAdapter(
         isPlayingPosition = storageUtil.isPlayingPosition()
         return when (state) {
             LINEAR -> {
-                val binding = MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val binding =
+                    MusicItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 MainViewHolder(binding)
             }
             GRID -> {
-                val binding = MusicItemGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                val binding =
+                    MusicItemGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
                 MainGridViewHolder(binding)
             }
         }
@@ -49,7 +51,7 @@ class MainAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when(state) {
+        when (state) {
             LINEAR -> {
                 val viewHolder = holder as MainViewHolder
                 with(viewHolder.binding) {

@@ -265,6 +265,7 @@ class PlayerFragment : Fragment() {
         //This makes it possible to save the screen state when switching tracks using the service.
         arguments?.putInt(ITEM_POSITION, playerViewModel.lastPosition.value ?: -1)
         playerViewModel.setStartDuration(binding.playerSeekBar.progress)
+        activity?.unbindService(serviceConnection)
         mBinding = null
     }
 }

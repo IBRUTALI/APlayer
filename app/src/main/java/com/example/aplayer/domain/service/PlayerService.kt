@@ -118,7 +118,6 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
     override fun onUnbind(intent: Intent?): Boolean {
         mediaSession.release()
-        removeNotification()
         return super.onUnbind(intent)
     }
 
@@ -529,6 +528,5 @@ class PlayerService : Service(), PlayerRepository, MediaPlayer.OnCompletionListe
 
         storageUtil.clearCachedAudioPlaylist()
     }
-
 }
 

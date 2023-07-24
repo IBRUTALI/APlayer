@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -28,10 +29,12 @@ import com.example.aplayer.data.settings.SettingsStorage
 import com.example.aplayer.databinding.FragmentMainBinding
 import com.example.aplayer.domain.music.model.Music
 import com.example.aplayer.presenter.main.adapter.AdapterState
+import com.example.aplayer.presenter.main.adapter.AdapterState.*
 import com.example.aplayer.presenter.main.adapter.MainAdapter
 import com.example.aplayer.presenter.main.adapter.toAdapterState
 import com.example.aplayer.utils.viewModelCreator
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
 const val Broadcast_PLAYING_POSITION = "play_pause"
@@ -46,6 +49,7 @@ class MainFragment : Fragment() {
     private val settingsUtil by lazy { SettingsStorage(requireContext()) }
     private val viewModel by viewModelCreator { MainViewModel(Repositories.providerRepository) }
     private var musicList: List<Music> = emptyList()
+    private var compositeDisposable = CompositeDisposable()
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -59,7 +63,7 @@ class MainFragment : Fragment() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                getMusic()
+                if (activity?.isChangingConfigurations == false) getMusic()
             }
         }
 
@@ -79,8 +83,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentMainBinding.inflate(layoutInflater, container, false)
-        LocalBroadcastManager.getInstance(requireContext())
-            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
+        registerReceiver()
         setHasOptionsMenu(true)
         return binding.root
     }
@@ -95,6 +98,7 @@ class MainFragment : Fragment() {
             }, { th ->
                 Log.e("!@#", th.message.toString())
             })
+        compositeDisposable.add(dispose)
     }
 
     private fun itemClickListener() {
@@ -156,27 +160,37 @@ class MainFragment : Fragment() {
         dialog.show()
     }
 
-    private fun switchAdapterLayouts(state: Int) {
-        when (state) {
-            0 -> {
-                adapter = MainAdapter(AdapterState.LINEAR)
-                binding.mainRecyclerView.layoutManager =
-                    LinearLayoutManager(requireContext())
-                binding.mainRecyclerView.adapter = adapter
-                adapter.setList(musicList)
-                settingsUtil.storeListStyle(AdapterState.LINEAR)
-                itemClickListener()
+    private fun switchAdapterLayouts(stateInt: Int) {
+        when (val state = stateInt.toAdapterState()) {
+            LINEAR -> {
+                setAdapterLayout(state)
             }
-            1 -> {
-                adapter = MainAdapter(AdapterState.GRID)
-                binding.mainRecyclerView.layoutManager =
-                    GridLayoutManager(requireContext(), 3)
-                binding.mainRecyclerView.adapter = adapter
-                adapter.setList(musicList)
-                settingsUtil.storeListStyle(AdapterState.GRID)
-                itemClickListener()
+            GRID -> {
+                setAdapterLayout(state)
             }
         }
+    }
+
+    private fun setAdapterLayout(state: AdapterState) {
+        adapter = MainAdapter(state)
+        binding.mainRecyclerView.layoutManager =
+            if (state == LINEAR) {
+                LinearLayoutManager(requireContext())
+            } else GridLayoutManager(requireContext(), 3)
+        binding.mainRecyclerView.adapter = adapter
+        adapter.setList(musicList)
+        settingsUtil.storeListStyle(state)
+        itemClickListener()
+    }
+
+    private fun registerReceiver() {
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiver, IntentFilter(Broadcast_PLAYING_POSITION))
+    }
+
+    private fun unregisterReceiver() {
+        LocalBroadcastManager.getInstance(requireContext())
+            .unregisterReceiver(receiver)
     }
 
     private fun requestPermissions() {
@@ -215,7 +229,8 @@ class MainFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
+        compositeDisposable.dispose()
+        unregisterReceiver()
         mBinding = null
     }
 }

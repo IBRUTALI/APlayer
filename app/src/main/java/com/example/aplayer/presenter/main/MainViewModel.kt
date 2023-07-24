@@ -3,6 +3,7 @@ package com.example.aplayer.presenter.main
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.aplayer.data.music.ProviderRepository
@@ -14,7 +15,7 @@ class MainViewModel(
     private val providerRepository: ProviderRepository
 ) : ViewModel() {
     private val _playingPosition = MutableLiveData(-1)
-    val playingPosition = _playingPosition
+    val playingPosition: LiveData<Int> = _playingPosition
 
     fun setPlayingPosition(position: Int) {
         _playingPosition.value = position
